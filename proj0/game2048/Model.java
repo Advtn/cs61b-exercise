@@ -145,19 +145,19 @@ public class Model extends Observable {
         // changed local variable to true.
         board.setViewingPerspective(side);
         for (int c = 0; c < board.size(); c++) {
-            boolean flag = false;
+            boolean isMerge = false;
             for (int r = board.size() - 2; r >= 0; r--) {
                 Tile t = board.tile(c, r);
                 if (t != null) {
                     int toEndCol = 0, rUp = r + 1;
-                    while (rUp < board.size() && (board.tile(c, rUp) == null || board.tile(c, rUp).value() == t.value())) {
+                    while (rUp < board.size() && (isTileNull(c, rUp) || isTileEqual(c, rUp, t))) {
                         toEndCol++;
                         rUp++;
                     }
-                    if (flag && board.tile(c, board.size() - 1) != null && board.tile(c, board.size() - 1).value() == t.value())
+                    if (isMerge && !isTileNull(c, board.size() - 1) && isTileEqual(c, board.size() - 1, t))
                         toEndCol--;
                     if (board.move(c, r + toEndCol, t)) {
-                        flag = true;
+                        isMerge = true;
                         score += board.tile(c, r + toEndCol).value();
                     }
                     changed = true;
@@ -171,6 +171,14 @@ public class Model extends Observable {
         }
 
         return changed;
+    }
+
+    public boolean isTileNull(int c, int r) {
+        return board.tile(c, r) == null;
+    }
+
+    public boolean isTileEqual(int c, int r, Tile t) {
+        return board.tile(c, r).value() == t.value();
     }
 
     /**
