@@ -34,10 +34,10 @@ public class TimeAList {
             for(int i = 0; i < startNum; i++){
                 El.addLast(1);
             }
-            Ns.addLast(El.size());
-            opCounts.addLast(El.size());
             double timeInSeconds = sw.elapsedTime();
             times.addLast(timeInSeconds);
+            Ns.addLast(El.size());
+            opCounts.addLast(El.size());
             startNum*=2;
         }
         printTimingTable(Ns,times,opCounts);
