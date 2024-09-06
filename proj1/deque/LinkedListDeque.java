@@ -1,6 +1,7 @@
 package deque;
 
 
+import jdk.jshell.SnippetEvent;
 
 public class LinkedListDeque<T> {
     private class StuffNode {
@@ -32,7 +33,7 @@ public class LinkedListDeque<T> {
     }
 
     public void addFirst(T item) {
-        StuffNode first = sentinel.next;
+        StuffNode first = getFirst();
         sentinel.next = new StuffNode(item);
         first.prev = sentinel.next;
         sentinel.next.next = first;
@@ -40,7 +41,7 @@ public class LinkedListDeque<T> {
         size = size + 1;
     }
     public void addLast(T item){
-        StuffNode last = sentinel.prev;
+        StuffNode last = getLast();
         sentinel.prev = new StuffNode(item);
         last.next = sentinel.prev;
         sentinel.prev.prev = last;
@@ -60,18 +61,27 @@ public class LinkedListDeque<T> {
             start = start.next;
         }
     }
-    public T getFirst(){
-        return sentinel.next.item;
+    private StuffNode getFirst(){
+        return sentinel.next;
     }
-    public T getLast(){
-        return sentinel.prev.item;
+    private StuffNode getLast(){
+        return sentinel.prev;
     }
     public T removeFirst(){
-        T first = getFirst();
-        return first;
+        StuffNode first = getFirst();
+        sentinel.next = first.next;
+        first.next.prev = sentinel;
+        first.prev = null;
+        first.next = null;
+        return first.item;
     }
     public T removeLast(){
-        return null;
+        StuffNode last = getLast();
+        sentinel.prev = last.prev;
+        last.prev.next = sentinel;
+        last.prev = null;
+        last.next = null;
+        return last.item;
     }
     public T get(int i){
         return null;
@@ -85,6 +95,11 @@ public class LinkedListDeque<T> {
         L.addFirst(1);
         L.addFirst(9);
         L.addLast(5);
+        L.removeFirst();
+        L.removeLast();
+        L.removeFirst();
+        L.removeFirst();
+        L.removeLast();
         L.printDeque();
     }
 }
