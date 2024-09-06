@@ -73,6 +73,7 @@ public class LinkedListDeque<T> {
         first.next.prev = sentinel;
         first.prev = null;
         first.next = null;
+        size = size - 1;
         return first.item;
     }
     public T removeLast(){
@@ -81,6 +82,7 @@ public class LinkedListDeque<T> {
         last.prev.next = sentinel;
         last.prev = null;
         last.next = null;
+        size = size - 1;
         return last.item;
     }
     public T get(int i){
