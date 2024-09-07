@@ -1,7 +1,7 @@
 package deque;
 
 
-import jdk.jshell.SnippetEvent;
+import java.util.Stack;
 
 public class LinkedListDeque<T> {
     private class StuffNode {
@@ -68,6 +68,7 @@ public class LinkedListDeque<T> {
         return sentinel.prev;
     }
     public T removeFirst(){
+        if(size == 0) return null;
         StuffNode first = getFirst();
         sentinel.next = first.next;
         first.next.prev = sentinel;
@@ -77,6 +78,7 @@ public class LinkedListDeque<T> {
         return first.item;
     }
     public T removeLast(){
+        if(size == 0) return null;
         StuffNode last = getLast();
         sentinel.prev = last.prev;
         last.prev.next = sentinel;
@@ -86,22 +88,37 @@ public class LinkedListDeque<T> {
         return last.item;
     }
     public T get(int i){
-        return null;
+        StuffNode start = getFirst();
+        for(int k = 0; k < i; k++){
+            if(start.next == sentinel) return null;
+            start = start.next;
+        }
+        return start.item;
     }
-
+    private T _getRecursive(StuffNode node, int index){
+        if(index == 0){
+            return node.item;
+        }
+        return _getRecursive(node.next,index - 1);
+    }
+    public T getRecursive(int index){
+        if(index < 0 || index >= size) return null;
+        return _getRecursive(sentinel.next, index);
+    }
     public static void main(String[] args) {
-        LinkedListDeque<Integer> L = new LinkedListDeque<>(1);
+        LinkedListDeque<Integer> L = new LinkedListDeque<>();
         L.addLast(2);
         L.addFirst(3);
         L.addLast(4);
         L.addFirst(1);
         L.addFirst(9);
         L.addLast(5);
-        L.removeFirst();
-        L.removeLast();
-        L.removeFirst();
-        L.removeFirst();
-        L.removeLast();
+//        L.removeFirst();
+//        L.removeLast();
+        System.out.println(L.getRecursive(3));
+        System.out.println(L.get(4));
+        System.out.println(L.get(0));
+        System.out.println(L.get(2));
         L.printDeque();
     }
 }
