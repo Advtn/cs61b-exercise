@@ -2,88 +2,80 @@ package deque;
 
 public class ArrayDeque <T>{
     private T[] items;
+    private int first;
+    private int last;
     private int size;
-    private int nextFirst;
-    private int nextLast;
+    private int capacity = 8;
     public ArrayDeque() {
-        items = (T []) new Object[8];
+        items = (T []) new Object[capacity];
         size = 0;
-        nextFirst = 0;
-        nextLast = 1;
+        first = 0;
+        last = 0;
     }
-    private void resize(int capacity){
-        T[] a = (T []) new Object[capacity];
-        System.arraycopy(items,0,a,0,size);
-        items = a;
+    /** I learned from AI, this is a perfect method.It puts the original queue into the new queue from 0. */
+    private void resize(int newCapacity){
+        T[] newArray = (T []) new Object[newCapacity];
+        for(int i = 0; i < size; i++){
+            newArray[i] = items[(first + i) % capacity];
+        }
+        items = newArray;
+        first = 0;
+        last = size % newCapacity;
+        capacity = newCapacity;
     }
     public void addFirst(T x){
-        if(size == items.length){
-            resize(size + 1);
+        if(size == capacity){
+            resize(capacity * 2);
         }
-        items[nextFirst] = x;
-        if(nextFirst == 0){
-            nextFirst = items.length;
-        }
-        nextFirst = nextFirst-1;
-        size = size + 1;
+        first = (first - 1 + capacity) % capacity;
+        items[first] = x;
+        size++;
     }
     public void addLast(T x) {
-        if(size == items.length){
-            resize(size * 2);
+        if(size == capacity){
+            resize(capacity * 2);
         }
-        items[nextLast] = x;
-        if(nextLast == items.length - 1){
-            nextLast = -1;
-        }
-        nextLast = nextLast + 1;
-        size = size + 1;
+        items[last] = x;
+        last = (last + 1) % capacity;
+        size++;
     }
     public boolean isEmpty(){
         return size == 0;
     }
-    public T getLast() {
-        return items[nextLast - 1];
-    }
-    public T getFirst(){
-        return items[nextFirst + 1];
-    }
     public T get(int i) {
-        int index;
-        if(nextFirst + 1 + i > items.length - 1){
-            index = nextFirst + 1 + i - items.length;
-        }else{
-            index = nextFirst + 1 + i;
-        }
-        return items[index];
+        return items[(first + i) % capacity];
     }
     public int size() {
         return size;
     }
     public T removeLast() {
-        T last = getLast();
-        items[nextLast - 1] = null;
-        nextLast = nextLast - 1;
-        size = size - 1;
-        return last;
+        last = (last - 1 + capacity) % capacity;
+        T value = items[last];
+        items[last] = null;
+        size--;
+        if(size > 0 && size == capacity / 4){
+            resize(capacity / 2);
+        }
+        return value;
     }
     public T removeFirst(){
-        T first = getFirst();
-        items[nextFirst + 1] = null;
-        nextFirst = nextFirst + 1;
-        size = size - 1;
-        return first;
+        T value = items[first];
+        items[first] = null;
+        first = (first + 1) % capacity;
+        size--;
+        if(size > 0 && size == capacity / 4){
+            resize(capacity / 2);
+        }
+        return value;
     }
     public void printDeque(){
-        int index = nextFirst + 1;
+        int index = first;
         for(int i = 0; i < items.length; i++){
             if(items[index] != null){
                 System.out.print(items[index]+" ");
-                index++;
+                index = (index + 1) % capacity;
             }else{
                 break;
-            }
-            if(index == items.length) {
-                index = 0;
             }
         }
         System.out.println();
@@ -100,7 +92,15 @@ public class ArrayDeque <T>{
         L.addFirst('g');
         L.addLast('h');
         L.printDeque();
-        L.addLast('i');
+        L.addFirst('a');
+        L.addLast('b');
+        L.addFirst('c');
+        L.addLast('d');
+        L.addLast('e');
+        L.addFirst('f');
+        L.addFirst('g');
+        L.addLast('h');
         L.printDeque();
+        System.out.println(L.get(4));
     }
 }
