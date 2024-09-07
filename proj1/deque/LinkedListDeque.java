@@ -60,6 +60,7 @@ public class LinkedListDeque<T> {
             System.out.print(start.item+" ");
             start = start.next;
         }
+        System.out.println();
     }
     private StuffNode getFirst(){
         return sentinel.next;
