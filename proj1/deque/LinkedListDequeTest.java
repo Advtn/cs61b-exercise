@@ -131,20 +131,19 @@ public class LinkedListDequeTest {
     @Test
     public void randomizedTest(){
         LinkedListDeque<Integer> L = new LinkedListDeque<>();
-        ArrayDeque<Integer> L1=new ArrayDeque<>();
-        int N = 5000;
+        ArrayDeque<Integer> L1 = new ArrayDeque<>();
+        int N = 100000;
         for (int i = 0; i < N; i += 1) {
-            int operationNumber = StdRandom.uniform(0, 5);
+            int operationNumber = StdRandom.uniform(0, 6);
             if (operationNumber == 0) {
                 // addLast
                 int randVal = StdRandom.uniform(0, 100);
                 L.addLast(randVal);
                 L1.addLast(randVal);
             } else if (operationNumber == 1) {
-                // size
-                int size = L.size();
-                int size1 = L1.size();
-            }else if(L.size()>0 && operationNumber == 2){
+                // getFirst
+                assertEquals(L.getFirst(),L1.getFirst());
+            }else if(!L.isEmpty() && operationNumber == 2){
                 // removeLast
                 int removeLast=L.removeLast();
                 int removeLast1=L1.removeLast();
@@ -154,11 +153,14 @@ public class LinkedListDequeTest {
                 int randVal = StdRandom.uniform(0, 100);
                 L.addFirst(randVal);
                 L1.addFirst(randVal);
-            }else if(L.size()>0 && operationNumber == 4){
+            }else if(!L.isEmpty() && operationNumber == 4){
                 // removeFirst
                 int removeFirst=L.removeFirst();
                 int removeFirst1=L1.removeFirst();
                 assertEquals(removeFirst,removeFirst1);
+            }else{
+                // getLast
+                assertEquals(L.getLast(),L1.getLast());
             }
         }
     }

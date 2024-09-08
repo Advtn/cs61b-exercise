@@ -45,14 +45,11 @@ public class ArrayDeque <T>{
     public T get(int i) {
         return items[(first + i) % capacity];
     }
-    public T getLast(){
-        if(isEmpty()) return null;
-        last = (last - 1 + capacity) % capacity;
-        return items[last];
-    }
     public T getFirst(){
-        if(isEmpty()) return null;
         return items[first];
+    }
+    public T getLast(){
+        return items[(last - 1 + capacity) % capacity];
     }
     public int size() {
         return size;
@@ -60,6 +57,7 @@ public class ArrayDeque <T>{
     public T removeLast() {
         if(isEmpty()) return null;
         T value = getLast();
+        last = (last - 1 + capacity) % capacity;
         items[last] = null;
         size--;
         if(size > 0 && size == capacity / 4){
