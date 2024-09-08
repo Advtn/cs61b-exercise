@@ -138,9 +138,9 @@ public class ArrayDequeTest {
         L.addLast(10);
         L.addFirst(5);
         L.printDeque();
-//        int last = L.getLast();
-//        int first = L.getFirst();
-//        assertEquals(10,last);
-//        assertEquals(5,first);
+        int last = L.getLast();
+        int first = L.getFirst();
+        assertEquals(10,last);
+        assertEquals(5,first);
     }
 }
