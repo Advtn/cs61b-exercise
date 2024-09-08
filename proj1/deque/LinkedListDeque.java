@@ -106,20 +106,5 @@ public class LinkedListDeque<T> {
         if(index < 0 || index >= size) return null;
         return _getRecursive(sentinel.next, index);
     }
-    public static void main(String[] args) {
-        LinkedListDeque<Integer> L = new LinkedListDeque<>();
-        L.addLast(2);
-        L.addFirst(3);
-        L.addLast(4);
-        L.addFirst(1);
-        L.addFirst(9);
-        L.addLast(5);
-//        L.removeFirst();
-//        L.removeLast();
-        System.out.println(L.getRecursive(3));
-        System.out.println(L.get(4));
-        System.out.println(L.get(0));
-        System.out.println(L.get(2));
-        L.printDeque();
-    }
+
 }

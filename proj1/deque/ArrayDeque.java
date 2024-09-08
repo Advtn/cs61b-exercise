@@ -49,6 +49,7 @@ public class ArrayDeque <T>{
         return size;
     }
     public T removeLast() {
+        if(isEmpty()) return null;
         last = (last - 1 + capacity) % capacity;
         T value = items[last];
         items[last] = null;
@@ -59,6 +60,7 @@ public class ArrayDeque <T>{
         return value;
     }
     public T removeFirst(){
+        if(isEmpty()) return null;
         T value = items[first];
         items[first] = null;
         first = (first + 1) % capacity;
@@ -81,26 +83,4 @@ public class ArrayDeque <T>{
         System.out.println();
     }
 
-    public static void main(String[] args) {
-        ArrayDeque<Character> L = new ArrayDeque<>();
-        L.addFirst('a');
-        L.addLast('b');
-        L.addFirst('c');
-        L.addLast('d');
-        L.addLast('e');
-        L.addFirst('f');
-        L.addFirst('g');
-        L.addLast('h');
-        L.printDeque();
-        L.addFirst('a');
-        L.addLast('b');
-        L.addFirst('c');
-        L.addLast('d');
-        L.addLast('e');
-        L.addFirst('f');
-        L.addFirst('g');
-        L.addLast('h');
-        L.printDeque();
-        System.out.println(L.get(4));
-    }
 }
