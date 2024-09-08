@@ -31,7 +31,7 @@ public class LinkedListDeque<T> {
     }
 
     public void addFirst(T item) {
-        StuffNode first = getFirst();
+        StuffNode first = getFirstNode();
         sentinel.next = new StuffNode(item);
         first.prev = sentinel.next;
         sentinel.next.next = first;
@@ -39,7 +39,7 @@ public class LinkedListDeque<T> {
         size = size + 1;
     }
     public void addLast(T item){
-        StuffNode last = getLast();
+        StuffNode last = getLastNode();
         sentinel.prev = new StuffNode(item);
         last.next = sentinel.prev;
         sentinel.prev.prev = last;
@@ -60,15 +60,15 @@ public class LinkedListDeque<T> {
         }
         System.out.println();
     }
-    private StuffNode getFirst(){
+    private StuffNode getFirstNode(){
         return sentinel.next;
     }
-    private StuffNode getLast(){
+    private StuffNode getLastNode(){
         return sentinel.prev;
     }
     public T removeFirst(){
         if(size == 0) return null;
-        StuffNode first = getFirst();
+        StuffNode first = getFirstNode();
         sentinel.next = first.next;
         first.next.prev = sentinel;
         first.prev = null;
@@ -78,7 +78,7 @@ public class LinkedListDeque<T> {
     }
     public T removeLast(){
         if(size == 0) return null;
-        StuffNode last = getLast();
+        StuffNode last = getLastNode();
         sentinel.prev = last.prev;
         last.prev.next = sentinel;
         last.prev = null;
@@ -87,12 +87,18 @@ public class LinkedListDeque<T> {
         return last.item;
     }
     public T get(int i){
-        StuffNode start = getFirst();
+        StuffNode start = getFirstNode();
         for(int k = 0; k < i; k++){
             if(start.next == sentinel) return null;
             start = start.next;
         }
         return start.item;
+    }
+    public T getFirst(){
+        return sentinel.next.item;
+    }
+    public T getLast(){
+        return sentinel.prev.item;
     }
     private T _getRecursive(StuffNode node, int index){
         if(index == 0){

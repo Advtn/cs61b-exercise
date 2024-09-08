@@ -123,4 +123,24 @@ public class ArrayDequeTest {
 
 
     }
+    @Test
+    public void getTest(){
+        ArrayDeque<Integer> L = new ArrayDeque<>();
+        L.addFirst(15);
+        L.addLast(7);
+        L.addFirst(2);
+        L.addLast(8);
+        L.addFirst(4);
+        L.addLast(9);
+        L.addLast(0);
+        L.addLast(1);
+        L.addFirst(3);
+        L.addLast(10);
+        L.addFirst(5);
+        L.printDeque();
+        int last = L.getLast();
+        int first = L.getFirst();
+        assertEquals(10,last);
+        assertEquals(5,first);
+    }
 }

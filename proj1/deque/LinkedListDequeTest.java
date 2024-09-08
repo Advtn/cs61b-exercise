@@ -1,5 +1,6 @@
 package deque;
 
+import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -126,5 +127,59 @@ public class LinkedListDequeTest {
         }
 
 
+    }
+    @Test
+    public void randomizedTest(){
+        LinkedListDeque<Integer> L = new LinkedListDeque<>();
+        ArrayDeque<Integer> L1=new ArrayDeque<>();
+        int N = 5000;
+        for (int i = 0; i < N; i += 1) {
+            int operationNumber = StdRandom.uniform(0, 5);
+            if (operationNumber == 0) {
+                // addLast
+                int randVal = StdRandom.uniform(0, 100);
+                L.addLast(randVal);
+                L1.addLast(randVal);
+            } else if (operationNumber == 1) {
+                // size
+                int size = L.size();
+                int size1 = L1.size();
+            }else if(L.size()>0 && operationNumber == 2){
+                // removeLast
+                int removeLast=L.removeLast();
+                int removeLast1=L1.removeLast();
+                assertEquals(removeLast,removeLast1);
+            }else if(operationNumber == 3){
+                // addFirst
+                int randVal = StdRandom.uniform(0, 100);
+                L.addFirst(randVal);
+                L1.addFirst(randVal);
+            }else if(L.size()>0 && operationNumber == 4){
+                // removeFirst
+                int removeFirst=L.removeFirst();
+                int removeFirst1=L1.removeFirst();
+                assertEquals(removeFirst,removeFirst1);
+            }
+        }
+    }
+    @Test
+    public void getTest(){
+        LinkedListDeque<Integer> L = new LinkedListDeque<>();
+        L.addFirst(15);
+        L.addLast(7);
+        L.addFirst(2);
+        L.addLast(8);
+        L.addFirst(4);
+        L.addLast(9);
+        L.addLast(0);
+        L.addLast(1);
+        L.addFirst(3);
+        L.addLast(10);
+        L.addFirst(5);
+        L.printDeque();
+        int last = L.getLast();
+        int first = L.getFirst();
+        assertEquals(10,last);
+        assertEquals(5,first);
     }
 }
