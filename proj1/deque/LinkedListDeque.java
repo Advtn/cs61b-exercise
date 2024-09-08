@@ -1,8 +1,6 @@
 package deque;
 
 
-import java.util.Stack;
-
 public class LinkedListDeque<T> {
     private class StuffNode {
         public T item;
