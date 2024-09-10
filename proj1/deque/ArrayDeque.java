@@ -1,11 +1,36 @@
 package deque;
 
-public class ArrayDeque<T> implements Deque<T>{
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     private T[] items;
     private int first;
     private int last;
     private int size;
     private int capacity = 8;
+    @Override
+    public Iterator<T> iterator(){
+        return new ArrayDequeIterator();
+    }
+    private class ArrayDequeIterator implements Iterator<T> {
+        private int wizPos;
+        private int count;
+        public ArrayDequeIterator(){
+            wizPos = first;
+            count = 0;
+        }
+        @Override
+        public boolean hasNext(){
+            return count < size;
+        }
+        @Override
+        public T next(){
+            T returnItem = items[wizPos];
+            wizPos = (wizPos + 1) % capacity;
+            count++;
+            return returnItem;
+        }
+    }
     public ArrayDeque() {
         items = (T []) new Object[capacity];
         size = 0;
@@ -92,4 +117,5 @@ public class ArrayDeque<T> implements Deque<T>{
         }
         System.out.println();
     }
+
 }
