@@ -11,7 +11,6 @@ import static org.junit.Assert.*;
  *  @author Josh Hug
  */
 public class TestGuitarString  {
-
     @Test
     public void testPluckTheAString() {
         GuitarString aString = new GuitarString(GuitarHeroLite.CONCERT_A);

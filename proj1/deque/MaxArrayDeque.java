@@ -5,10 +5,10 @@ import java.util.Iterator;
 
 public class MaxArrayDeque<T> extends ArrayDeque<T>{
     private ArrayDeque<T> deque;
-    private Comparator<T> comp;
+    private Comparator<T> cmp;
     public MaxArrayDeque(Comparator<T> c){
         deque = new ArrayDeque<>();
-        comp = c;
+        cmp = c;
     }
     public T max(){
         if(deque.isEmpty()) {
