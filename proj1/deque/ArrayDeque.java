@@ -2,29 +2,29 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] items;
     private int first;
     private int last;
     private int size;
     private int capacity = 8;
     @Override
-    public Iterator<T> iterator(){
+    public Iterator<T> iterator() {
         return new ArrayDequeIterator();
     }
     private class ArrayDequeIterator implements Iterator<T> {
         private int wizPos;
         private int count;
-        public ArrayDequeIterator(){
+        ArrayDequeIterator() {
             wizPos = first;
             count = 0;
         }
         @Override
-        public boolean hasNext(){
+        public boolean hasNext() {
             return count < size;
         }
         @Override
-        public T next(){
+        public T next() {
             T returnItem = items[wizPos];
             wizPos = (wizPos + 1) % capacity;
             count++;
@@ -37,10 +37,10 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
         first = 0;
         last = 0;
     }
-    /** I learned from AI, this is a perfect method.It puts the original queue into the new queue from 0. */
-    private void resize(int newCapacity){
+    /** I learned from AI, this is a perfect method. */
+    private void resize(int newCapacity) {
         T[] newArray = (T []) new Object[newCapacity];
-        for(int i = 0; i < size; i++){
+        for (int i = 0; i < size; i++) {
             newArray[i] = items[(first + i) % capacity];
         }
         items = newArray;
@@ -49,8 +49,8 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
         capacity = newCapacity;
     }
     @Override
-    public void addFirst(T x){
-        if(size == capacity){
+    public void addFirst(T x) {
+        if (size == capacity) {
             resize(capacity * 2);
         }
         first = (first - 1 + capacity) % capacity;
@@ -59,7 +59,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     }
     @Override
     public void addLast(T x) {
-        if(size == capacity){
+        if (size == capacity) {
             resize(capacity * 2);
         }
         items[last] = x;
@@ -70,10 +70,10 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     public T get(int i) {
         return items[(first + i) % capacity];
     }
-    public T getFirst(){
+    public T getFirst() {
         return items[first];
     }
-    public T getLast(){
+    public T getLast() {
         return items[(last - 1 + capacity) % capacity];
     }
     @Override
@@ -82,40 +82,43 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     }
     @Override
     public T removeLast() {
-        if(isEmpty()) return null;
+        if (isEmpty()) {
+            return null;
+        }
         T value = getLast();
         last = (last - 1 + capacity) % capacity;
         items[last] = null;
         size--;
-        if(size > 0 && size == capacity / 4){
+        if (size > 0 && size == capacity / 4) {
             resize(capacity / 2);
         }
         return value;
     }
     @Override
     public T removeFirst(){
-        if(isEmpty()) return null;
+        if (isEmpty()) {
+            return null;
+        }
         T value = getFirst();
         items[first] = null;
         first = (first + 1) % capacity;
         size--;
-        if(size > 0 && size == capacity / 4){
+        if (size > 0 && size == capacity / 4) {
             resize(capacity / 2);
         }
         return value;
     }
     @Override
-    public void printDeque(){
+    public void printDeque() {
         int index = first;
-        for(int i = 0; i < items.length; i++){
-            if(items[index] != null){
-                System.out.print(items[index]+" ");
+        for (int i = 0; i < items.length; i++) {
+            if (items[index] != null) {
+                System.out.print(items[index] + " ");
                 index = (index + 1) % capacity;
-            }else{
+            }else {
                 break;
             }
         }
         System.out.println();
     }
-
 }

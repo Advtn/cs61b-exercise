@@ -8,11 +8,11 @@ public class GuitarHero {
 
     GuitarString[] gs = new GuitarString[keyboard.length()];
 
-    public GuitarHero(){
+    public GuitarHero() {
         getFrequency();
     }
-    private void getFrequency(){
-        for(int i = 0; i < gs.length; i++){
+    private void getFrequency() {
+        for (int i = 0; i < gs.length; i++) {
             double fre = 440 * Math.pow(2, (double) (i - 24) / 12);
             gs[i] = new GuitarString(fre);
         }
@@ -26,14 +26,14 @@ public class GuitarHero {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
                 int indexKey = L.keyboard.indexOf(key);
-                if(indexKey != -1){
+                if (indexKey != -1) {
                     L.gs[indexKey].pluck();
                 }
             }
 
             /* compute the superposition of samples */
             double sample = 0;
-            for(GuitarString g : L.gs){
+            for (GuitarString g : L.gs) {
                 sample += g.sample();
             }
 
