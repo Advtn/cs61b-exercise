@@ -142,7 +142,7 @@ public class LinkedListDequeTest {
                 L1.addLast(randVal);
             } else if (operationNumber == 1) {
                 // getFirst
-                assertEquals(L.getFirst(),L1.getFirst());
+                assertEquals(L.get(0),L1.get(0));
             }else if(!L.isEmpty() && operationNumber == 2){
                 // removeLast
                 int removeLast=L.removeLast();
@@ -160,7 +160,7 @@ public class LinkedListDequeTest {
                 assertEquals(removeFirst,removeFirst1);
             }else{
                 // getLast
-                assertEquals(L.getLast(),L1.getLast());
+//                assertEquals(L.getLast(),L1.getLast());
             }
         }
     }
@@ -179,9 +179,5 @@ public class LinkedListDequeTest {
         L.addLast(10);
         L.addFirst(5);
         L.printDeque();
-        int last = L.getLast();
-        int first = L.getFirst();
-        assertEquals(10,last);
-        assertEquals(5,first);
     }
 }

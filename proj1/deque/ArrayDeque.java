@@ -70,10 +70,10 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     public T get(int i) {
         return items[(first + i) % capacity];
     }
-    public T getFirst() {
+    private T getFirst() {
         return items[first];
     }
-    public T getLast() {
+    private T getLast() {
         return items[(last - 1 + capacity) % capacity];
     }
     @Override
@@ -95,7 +95,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return value;
     }
     @Override
-    public T removeFirst(){
+    public T removeFirst() {
         if (isEmpty()) {
             return null;
         }
@@ -115,7 +115,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             if (items[index] != null) {
                 System.out.print(items[index] + " ");
                 index = (index + 1) % capacity;
-            }else {
+            } else {
                 break;
             }
         }

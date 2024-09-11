@@ -18,7 +18,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
     private class LinkedListDequeIterator implements Iterator<T> {
         private StuffNode wizPos;
-        public LinkedListDequeIterator() {
+        LinkedListDequeIterator() {
             wizPos = sentinel.next;
         }
         @Override
@@ -40,15 +40,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         sentinel.next = sentinel;
         sentinel.prev = sentinel;
         size = 0;
-    }
-
-    public LinkedListDeque(T item) {
-        sentinel = new StuffNode(null);
-        sentinel.next = new StuffNode(item);
-        sentinel.prev = sentinel.next;
-        sentinel.next.next = sentinel;
-        sentinel.next.prev = sentinel;
-        size = 1;
     }
     @Override
     public void addFirst(T item) {
@@ -125,22 +116,22 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
         return start.item;
     }
-    public T getFirst() {
+    private T getFirst() {
         return sentinel.next.item;
     }
-    public T getLast() {
+    private T getLast() {
         return sentinel.prev.item;
     }
-    private T _getRecursive(StuffNode node, int index) {
+    private T getRecursive(StuffNode node, int index) {
         if (index == 0) {
             return node.item;
         }
-        return _getRecursive(node.next,index - 1);
+        return getRecursive(node.next, index - 1);
     }
     public T getRecursive(int index) {
-        if(index < 0 || index >= size) {
+        if (index < 0 || index >= size) {
             return null;
         }
-        return _getRecursive(sentinel.next, index);
+        return getRecursive(sentinel.next, index);
     }
 }

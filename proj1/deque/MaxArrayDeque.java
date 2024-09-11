@@ -50,9 +50,6 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
 
         // 使用构造时提供的 Comparator 来获取最大值
 //        System.out.println("Max using constructor's comparator: " + maxDeque.max());
-
-        // 使用一个新的 Comparator 来获取最大值
-//        System.out.println("Max using new comparator (reverse order): " + maxDeque.max(Comparator.reverseOrder()));
     }
 }
 
