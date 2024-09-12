@@ -1,18 +1,17 @@
 package deque;
 
-import java.util.Comparator;
 import java.util.ArrayDeque;
-
+import java.util.Comparator;
 
 public class MaxArrayDeque<T> extends ArrayDeque<T> {
+    private final Comparator<T> comparator;
 
-    Comparator<T> comparator;
+    // 构造函数
     public MaxArrayDeque(Comparator<T> c) {
-        super();
-        comparator = c;
+        this.comparator = c;
     }
 
-
+    // 返回由先前给定的 Comparator 控制的双端队列中的最大元素
     public T max() {
         if (isEmpty()) {
             return null;
@@ -26,6 +25,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         return maxElement;
     }
 
+    // 返回由参数 Comparator c 控制的双端队列中的最大元素
     public T max(Comparator<T> c) {
         if (isEmpty()) {
             return null;
@@ -38,18 +38,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         }
         return maxElement;
     }
-    public static void main(String[] args) {
-        // 创建一个 MaxArrayDeque，并使用一个自定义 Comparator
-//        MaxArrayDeque<Integer> maxDeque = new MaxArrayDeque<>(Comparator.naturalOrder());
-
-        // 添加元素
-//        maxDeque.add(5);
-//        maxDeque.add(3);
-//        maxDeque.add(9);
-//        maxDeque.add(1);
-
-        // 使用构造时提供的 Comparator 来获取最大值
-//        System.out.println("Max using constructor's comparator: " + maxDeque.max());
-    }
 }
+
+
 
