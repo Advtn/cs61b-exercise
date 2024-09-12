@@ -124,7 +124,7 @@ public class ArrayDequeTest {
 
     }
     @Test
-    public void getTest(){
+    public void getTest() {
         ArrayDeque<Integer> L = new ArrayDeque<>();
         L.addFirst(15);
         L.addLast(7);
@@ -140,7 +140,7 @@ public class ArrayDequeTest {
         L.printDeque();
     }
     @Test
-    public void equalsTest(){
+    public void equalsTest() {
         ArrayDeque<Integer> L = new ArrayDeque<>();
         L.addFirst(1);
         L.addLast(2);

@@ -129,7 +129,7 @@ public class LinkedListDequeTest {
 
     }
     @Test
-    public void randomizedTest(){
+    public void randomizedTest() {
         LinkedListDeque<Integer> L = new LinkedListDeque<>();
         ArrayDeque<Integer> L1 = new ArrayDeque<>();
         int N = 100000;
@@ -143,29 +143,29 @@ public class LinkedListDequeTest {
             } else if (operationNumber == 1) {
                 // getFirst
                 assertEquals(L.get(0),L1.get(0));
-            }else if(!L.isEmpty() && operationNumber == 2){
+            } else if (!L.isEmpty() && operationNumber == 2) {
                 // removeLast
                 int removeLast=L.removeLast();
                 int removeLast1=L1.removeLast();
                 assertEquals(removeLast,removeLast1);
-            }else if(operationNumber == 3){
+            } else if (operationNumber == 3) {
                 // addFirst
                 int randVal = StdRandom.uniform(0, 100);
                 L.addFirst(randVal);
                 L1.addFirst(randVal);
-            }else if(!L.isEmpty() && operationNumber == 4){
+            } else if (!L.isEmpty() && operationNumber == 4) {
                 // removeFirst
                 int removeFirst=L.removeFirst();
                 int removeFirst1=L1.removeFirst();
                 assertEquals(removeFirst,removeFirst1);
-            }else{
+            } else {
                 // getLast
 //                assertEquals(L.getLast(),L1.getLast());
             }
         }
     }
     @Test
-    public void getTest(){
+    public void getTest() {
         LinkedListDeque<Integer> L = new LinkedListDeque<>();
         L.addFirst(15);
         L.addLast(7);
@@ -181,7 +181,7 @@ public class LinkedListDequeTest {
         L.printDeque();
     }
     @Test
-    public void equalsTest(){
+    public void equalsTest() {
         LinkedListDeque<Integer> L = new LinkedListDeque<>();
         L.addFirst(1);
         L.addLast(2);
