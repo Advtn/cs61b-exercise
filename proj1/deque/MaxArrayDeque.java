@@ -1,11 +1,10 @@
 package deque;
 
-import java.util.ArrayDeque;
 import java.util.Comparator;
 
 public class MaxArrayDeque<T> extends ArrayDeque<T> {
     private final Comparator<T> comparator;
-    MaxArrayDeque(Comparator<T> c) {
+    public MaxArrayDeque(Comparator<T> c) {
         this.comparator = c;
     }
     public T max() {
@@ -15,9 +14,9 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         if (isEmpty()) {
             return null;
         }
-        T maxElement = null;
+        T maxElement = get(0);
         for (T element : this) {
-            if (maxElement == null || c.compare(element, maxElement) > 0) {
+            if (c.compare(element, maxElement) > 0) {
                 maxElement = element;
             }
         }
