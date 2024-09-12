@@ -180,4 +180,20 @@ public class LinkedListDequeTest {
         L.addFirst(5);
         L.printDeque();
     }
+    @Test
+    public void equalsTest(){
+        LinkedListDeque<Integer> L = new LinkedListDeque<>();
+        L.addFirst(1);
+        L.addLast(2);
+        L.addFirst(3);
+        L.addLast(4);
+        L.addFirst(5);
+        LinkedListDeque<Integer> L1 = new LinkedListDeque<>();
+        L1.addFirst(1);
+        L1.addFirst(3);
+        L1.addLast(2);
+        L1.addFirst(5);
+        L1.addLast(4);
+        assertEquals(L, L1);
+    }
 }
