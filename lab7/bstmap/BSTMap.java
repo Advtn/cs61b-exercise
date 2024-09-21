@@ -99,29 +99,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         System.out.println(root.key);
         printInOrder(root.right);
     }
-    public void printlnOrder() {
+    private void printlnOrder() {
         printInOrder(root);
-    }
-    public static void main(String[] args) {
-        BSTMap<String, Integer> L = new BSTMap<>();
-        L.put("hello", 2);
-        L.put("world", 3);
-        L.put("i", 3);
-        L.put("am", 3);
-        L.put("the", 3);
-        L.put("bone", 3);
-        L.put("of", 3);
-        L.put("my", 3);
-        L.put("sword", 3);
-        L.printlnOrder();
-        System.out.println(L.containsKey("world"));
-        System.out.println(L.containsKey("hello"));
-        System.out.println(L.containsKey("I"));
-        System.out.println(L.containsKey("Iad"));
-        System.out.println(L.containsKey("Isdas"));
-        System.out.println(L.containsKey("am"));
-        System.out.println(L.containsKey("bone"));
-        System.out.println(L.containsKey("sword"));
-        L.clear();
     }
 }
