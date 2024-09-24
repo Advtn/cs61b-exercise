@@ -250,14 +250,4 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
             return currentBucketIterator.next();
         }
     }
-    public static void main(String[] args) {
-        MyHashMap<String, Integer> h = new MyHashMap<>();
-        h.put("hello",2);
-        h.put("Hash",3);
-        h.put("Map",1);
-        h.put("Hi",7);
-        h.put("My",6);
-        h.put("Friend",5);
-        System.out.println(h.keySet());
-    }
 }
