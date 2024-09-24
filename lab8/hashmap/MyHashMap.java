@@ -9,7 +9,7 @@ import java.util.*;
  *  Assumes null keys will never be inserted, and does not resize down upon remove().
  *  @author fuchaoma
  */
-public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
+public class MyHashMap<K, V> implements Map61B<K, V> {
 
     /**
      * Protected helper class to store key/value pairs
