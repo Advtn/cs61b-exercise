@@ -137,7 +137,10 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
         return size;
     }
     private int getBucketIndex(K key) {
-        return Math.floorMod(key.hashCode(), buckets.length);
+        return getBucketIndex(key, buckets);
+    }
+    private int getBucketIndex(K key, Collection<Node>[] table) {
+        return Math.floorMod(key.hashCode(), table.length);
     }
     @Override
     public void put(K key, V value) {
@@ -150,8 +153,23 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
         node = createNode(key, value);
         buckets[bucketIndex].add(node);
         size++;
+        if (hasReachedMaxLoadFactor()) {
+            resize(buckets.length * 2);
+        }
     }
-
+    private boolean hasReachedMaxLoadFactor() {
+        return ((double) size / buckets.length) > maxLoadFactor;
+    }
+    private void resize(int capacity) {
+        Collection<Node>[] newBuckets = createTable(capacity);
+        Iterator<Node> nodeIterator = new MyHashMapNodeIterator();
+        while (nodeIterator.hasNext()) {
+            Node node = nodeIterator.next();
+            int bucketIndex = getBucketIndex(node.key, newBuckets);
+            newBuckets[bucketIndex].add(node);
+        }
+        buckets = newBuckets;
+    }
     @Override
     public Set<K> keySet() {
         HashSet<K> hs = new HashSet<>();
@@ -163,12 +181,26 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
 
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        Node node = getNode(key);
+        int index = getBucketIndex(key);
+        if (node == null) {
+            return null;
+        }
+        buckets[index].remove(node);
+        size--;
+        return node.value;
     }
 
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        Node node = getNode(key);
+        int index = getBucketIndex(key);
+        if (node == null || !node.value.equals(value)) {
+            return null;
+        }
+        buckets[index].remove(node);
+        size--;
+        return value;
     }
 
     @Override
@@ -176,21 +208,33 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
         return new MyHashMapIterator();
     }
     private class MyHashMapIterator implements Iterator<K> {
-        private Iterator<Node> currentListIterator;
+        private final Iterator<Node> nodeIterator = new MyHashMapNodeIterator();
+        @Override
+        public boolean hasNext() {
+            return nodeIterator.hasNext();
+        }
+
+        @Override
+        public K next() {
+            return nodeIterator.next().key;
+        }
+    }
+    private class MyHashMapNodeIterator implements Iterator<Node> {
+        private Iterator<Node> currentBucketIterator;
         private int currentBucketIndex;
         private Iterator<Node> getCurrentListIterator() {
             return buckets[currentBucketIndex].iterator();
         }
-        MyHashMapIterator() {
+        MyHashMapNodeIterator() {
             currentBucketIndex = 0;
-            currentListIterator = getCurrentListIterator();
+            currentBucketIterator = getCurrentListIterator();
         }
         @Override
         public boolean hasNext() {
-            while (currentListIterator == null || !currentListIterator.hasNext()) {
+            while (currentBucketIterator == null || !currentBucketIterator.hasNext()) {
                 if (currentBucketIndex < buckets.length - 1) {
                     currentBucketIndex++;
-                    currentListIterator = getCurrentListIterator();
+                    currentBucketIterator = getCurrentListIterator();
                 } else {
                     return false;
                 }
@@ -199,11 +243,11 @@ public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
         }
 
         @Override
-        public K next() {
+        public Node next() {
             if (!hasNext()) {
                 return null;
             }
-            return currentListIterator.next().key;
+            return currentBucketIterator.next();
         }
     }
     public static void main(String[] args) {
