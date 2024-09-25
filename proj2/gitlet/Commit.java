@@ -1,26 +1,78 @@
 package gitlet;
 
-// TODO: any imports you need here
 
-import java.util.Date; // TODO: You'll likely use this in this class
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import static gitlet.Utils.*;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
  *
- *  @author TODO
+ *  @author Advtn
  */
 public class Commit {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
-     */
+
 
     /** The message of this Commit. */
-    private String message;
+    private final String message;
 
-    /* TODO: fill in the rest of this class. */
+    /**
+     * The date of this Commit be created.
+     */
+    private final Date date;
+
+    /**
+     * The commit id that sha1 generated.
+     */
+    private String id;
+
+    /**
+     * Initial commit
+     */
+    public Commit() {
+        date = new Date(0);
+        message = "initial commit";
+    }
+
+    public Commit(String message) {
+        date = new Date();
+        this.message = message;
+    }
+
+    /**
+     * Get the timestamp.
+     * @return Date and time
+     */
+    public String getTimestamp() {
+        DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
+        return dateFormat.format(date);
+    }
+
+    /** generate SHA-1 hash code.  */
+    private String generateId() {
+        return sha1();
+    }
+
+    /**
+     * Get the commit message.
+     * @return String of commit message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Get the date when the commit be created.
+     */
+    public Date getDate() {
+        return date;
+    }
+
+    public static void main(String[] args) {
+        Commit commit = new Commit("test");
+        System.out.println(commit.getTimestamp());
+    }
 }
