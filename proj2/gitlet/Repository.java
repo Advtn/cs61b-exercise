@@ -27,7 +27,7 @@ public class Repository {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     /** The objects directory. */
-    private static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
+    public static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
 
     /** The refs directory. */
     private static final File REFS_DIR = join(GITLET_DIR, "refs");
@@ -35,8 +35,17 @@ public class Repository {
     /** The heads directory, saved the branches.*/
     private static final File HEADS_DIR = join(REFS_DIR, "heads");
 
-    /** The HEAD file.*/
+    /**
+     * The HEAD file.
+     * points to the current working branch
+     * */
     private static final File HEAD = join(GITLET_DIR, "HEAD");
+
+    /**
+     * The index file.
+     *  staging area
+     *  */
+    private static final File index = join(GITLET_DIR, "index");
 
     /**
      * Initialize a repository at the current working directory.
@@ -58,6 +67,7 @@ public class Repository {
         mkdir(REFS_DIR);
         mkdir(HEADS_DIR);
         setCurrentBranch(DEFAULT_BRANCH_NAME);
+        createInitialCommit();
     }
 
     /**
@@ -68,7 +78,38 @@ public class Repository {
         writeContents(HEAD, DEFAULT_HEAD_REF_PREFIX + branchName);
     }
 
-    private static void createInitialCommit() {
+    /**
+     * Set the branch.
+     * write the commit id to the branch file.
+     * */
+    private static void setBranch(String branchName, String commitId) {
+        File branchFile = getBranchFile(branchName);
+        writeContents(branchFile, commitId);
+    }
 
+    /**
+     * Get branch file.
+     * generate branch file in the heads directory.
+     * */
+    private static File getBranchFile(String branchName) {
+        return join(HEADS_DIR, branchName);
+    }
+
+    /** Get commit that branch pointed. */
+    private static Commit getBranch(String branchName) {
+        File branchFile = getBranchFile(branchName);
+        String branchCommitId = readContentsAsString(branchFile);
+        return Commit.fromFile(branchCommitId);
+    }
+
+    /** Creates initial commit. */
+    private static void createInitialCommit() {
+        Commit initialCommit = new Commit();
+        initialCommit.save();
+        setBranch(DEFAULT_BRANCH_NAME, initialCommit.getId());
+    }
+
+    public static void checkout(String branchToCheckout) {
+        setCurrentBranch(branchToCheckout);
     }
 }

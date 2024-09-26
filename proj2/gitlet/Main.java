@@ -44,6 +44,7 @@ public class Main {
                 break;
             case "checkout":
                 validateNumArgs(args, 1);
+                Repository.checkout(args[0]);
                 break;
             case "branch":
                 validateNumArgs(args, 2);

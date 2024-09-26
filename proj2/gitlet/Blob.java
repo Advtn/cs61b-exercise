@@ -1,7 +1,7 @@
 package gitlet;
 
 /**
- * Represents file to store contents.
+ * Represents files to store contents.
  * @author Advtn
  */
 public class Blob {
