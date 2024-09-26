@@ -52,6 +52,10 @@ public class MyUtils {
      * @param obj object will be stored
      */
     public static void saveObjectFile(File file, Serializable obj) {
-        writeContents(file, obj);
+        File dir = file.getParentFile();
+        if (!dir.exists()) {
+            mkdir(dir);
+        }
+        writeObject(file, obj);
     }
 }
