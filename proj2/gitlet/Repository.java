@@ -18,7 +18,7 @@ public class Repository {
     /**
      * HEAD ref prefix.
      */
-    private static final String DEFAULT_HEAD_REF_PREFIX = "ref: refs/heads/";
+    private static final String HEAD_BRANCH_REF_PREFIX = "ref: refs/heads/";
 
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
@@ -44,8 +44,28 @@ public class Repository {
     /**
      * The index file.
      *  staging area
-     *  */
+     */
     private static final File index = join(GITLET_DIR, "index");
+
+    /** Files in the current working directory. */
+    private static final Lazy<File[]> currentFiles = lazy(() -> CWD.listFiles(File::isFile));
+
+    /** The current branch name. */
+    private static final Lazy<String> currentBranch = lazy(() -> {
+        String HEADFileContent = readContentsAsString(HEAD);
+        return HEADFileContent.replace(HEAD_BRANCH_REF_PREFIX,"");
+    });
+
+    /** The commit that HEAD points to. */
+    private final Lazy<Commit> HEADCommit = lazy(() -> getBranchCommit(currentBranch.get()));
+
+    /** The staging area. */
+//    private final Lazy<StagingArea> stagingArea = lazy(() -> {
+//       StagingArea s = index.exists()
+//           ? StagingArea.fromFile()
+//           : new StagingArea();
+//
+//    });
 
     /**
      * Initialize a repository at the current working directory.
@@ -75,7 +95,7 @@ public class Repository {
      * @param branchName Name of branch
      */
     private static void setCurrentBranch(String branchName) {
-        writeContents(HEAD, DEFAULT_HEAD_REF_PREFIX + branchName);
+        writeContents(HEAD, HEAD_BRANCH_REF_PREFIX + branchName);
     }
 
     /**
@@ -96,7 +116,7 @@ public class Repository {
     }
 
     /** Get commit that branch pointed. */
-    private static Commit getBranch(String branchName) {
+    private static Commit getBranchCommit(String branchName) {
         File branchFile = getBranchFile(branchName);
         String branchCommitId = readContentsAsString(branchFile);
         return Commit.fromFile(branchCommitId);

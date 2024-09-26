@@ -3,10 +3,22 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.function.Supplier;
 
 import static gitlet.Utils.*;
 
 public class MyUtils {
+
+    /**
+     * Get a lazy initialized value.
+     *
+     * @param delegate Function to get the value
+     * @param <T>      Type of the value
+     * @return Lazy instance
+     */
+    public static <T> Lazy<T> lazy(Supplier<T> delegate) {
+        return new Lazy<>(delegate);
+    }
 
     /**
      * Print error message and exit the program.

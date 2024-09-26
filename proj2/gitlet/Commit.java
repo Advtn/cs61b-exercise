@@ -122,4 +122,10 @@ public class Commit implements Serializable {
     public static Commit fromFile(String id) {
         return readObject(getObjectFile(id), Commit.class);
     }
+
+    /** Get commit log. */
+    public void getLog() {
+        System.out.print("commit" + " " + id);
+        System.out.print("Date:" + "   " + getTimestamp());
+    }
 }

@@ -32,6 +32,7 @@ public class Main {
                 break;
             case "log":
                 validateNumArgs(args, 1);
+//                new Repository().log();
                 break;
             case "global-log":
                 validateNumArgs(args, 1);
@@ -41,6 +42,7 @@ public class Main {
                 break;
             case "status":
                 validateNumArgs(args, 1);
+//                Repository.status();
                 break;
             case "checkout":
                 validateNumArgs(args, 1);
@@ -57,6 +59,9 @@ public class Main {
                 break;
             case "merge":
                 validateNumArgs(args, 2);
+                break;
+            default:
+                exit("No command with that name exists.");
                 break;
         }
     }
