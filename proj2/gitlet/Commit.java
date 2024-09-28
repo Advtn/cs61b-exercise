@@ -37,6 +37,7 @@ public class Commit implements Serializable {
 
     /**
      * The tracked files Map with file path as key and SHA1 id as value.
+     * e.g. Hello.txt - Blob0(Blob0 SHA-1 id)
      */
     private final Map<String, String> tracked;
 
@@ -124,8 +125,12 @@ public class Commit implements Serializable {
     }
 
     /** Get commit log. */
-    public void getLog() {
-        System.out.print("commit" + " " + id);
-        System.out.print("Date:" + "   " + getTimestamp());
+    public String getLog() {
+        StringBuffer logBuilder = new StringBuffer();
+        logBuilder.append("===").append("\n");
+        logBuilder.append("commit ").append(id).append("\n");
+        logBuilder.append("Date: ").append(getTimestamp()).append("\n");
+        logBuilder.append(message).append("\n");
+        return logBuilder.toString();
     }
 }

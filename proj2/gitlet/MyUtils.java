@@ -66,7 +66,7 @@ public class MyUtils {
     public static void saveObjectFile(File file, Serializable obj) {
         File dir = file.getParentFile();
         if (!dir.exists()) {
-            mkdir(dir);
+            dir.mkdir();
         }
         writeObject(file, obj);
     }

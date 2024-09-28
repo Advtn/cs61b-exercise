@@ -22,7 +22,10 @@ public class Main {
                 Repository.init();
                 break;
             case "add":
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
+                String fileName = args[1];
+                new Repository().add(fileName);
                 break;
             case "commit":
                 validateNumArgs(args, 2);
@@ -31,8 +34,9 @@ public class Main {
                 validateNumArgs(args, 2);
                 break;
             case "log":
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 1);
-//                new Repository().log();
+                new Repository().log();
                 break;
             case "global-log":
                 validateNumArgs(args, 1);
@@ -41,12 +45,12 @@ public class Main {
                 validateNumArgs(args, 2);
                 break;
             case "status":
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 1);
-//                Repository.status();
+                new Repository().status();
                 break;
             case "checkout":
                 validateNumArgs(args, 1);
-                Repository.checkout(args[0]);
                 break;
             case "branch":
                 validateNumArgs(args, 2);
