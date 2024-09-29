@@ -38,6 +38,17 @@ public class MyUtils {
     }
 
     /**
+     * Delete the file.
+     *
+     * @param file File instance
+     */
+    public static void rm(File file) {
+        if (!file.delete()) {
+            throw new IllegalArgumentException(String.format("rm: %s: Failed to delete.", file.getPath()));
+        }
+    }
+
+    /**
      * Get a File instance with the path generated from SHA1 id in the objects folder.
      * @param id SHA1 id
      * @return File instance

@@ -17,59 +17,65 @@ public class Main {
         }
         String firstArg = args[0];
         switch(firstArg) {
-            case "init":
+            case "init" -> {
                 validateNumArgs(args, 1);
                 Repository.init();
-                break;
-            case "add":
+            }
+            case "add" -> {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
                 String fileName = args[1];
                 new Repository().add(fileName);
-                break;
-            case "commit":
+            }
+            case "commit" -> {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
                 String message = args[1];
+                if (message.isEmpty()) {
+                    exit("Please enter a commit message.");
+                }
                 new Repository().commit(message);
-                break;
-            case "rm":
+            }
+            case "rm" -> {
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
-                break;
-            case "log":
+                String fileName = args[1];
+                new Repository().remove(fileName);
+            }
+            case "log" -> {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 1);
                 new Repository().log();
-                break;
-            case "global-log":
+            }
+            case "global-log" -> {
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 1);
-                break;
-            case "find":
+            }
+            case "find" -> {
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
-                break;
-            case "status":
+            }
+            case "status" -> {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 1);
                 new Repository().status();
-                break;
-            case "checkout":
+            }
+            case "checkout" -> {
                 validateNumArgs(args, 1);
-                break;
-            case "branch":
+            }
+            case "branch" -> {
                 validateNumArgs(args, 2);
-                break;
-            case "rm-branch":
+            }
+            case "rm-branch" ->{
                 validateNumArgs(args, 2);
-                break;
-            case "reset":
+            }
+            case "reset" -> {
                 validateNumArgs(args, 2);
-                break;
-            case "merge":
+            }
+            case "merge" -> {
                 validateNumArgs(args, 2);
-                break;
-            default:
-                exit("No command with that name exists.");
-                break;
+            }
+            default -> exit("No command with that name exists.");
         }
     }
 

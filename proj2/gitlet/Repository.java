@@ -185,7 +185,7 @@ public class Repository {
             currentCommit = Commit.fromFile(firstParentCommitId);
         }
 
-        System.out.println(logBuilder);
+        System.out.print(logBuilder);
     }
 
     /** Print current status. */
@@ -195,24 +195,66 @@ public class Repository {
         // Branches
         statusBuilder.append("=== Branches ===").append("\n").append("\n");
         statusBuilder.append("*").append(currentBranch.get()).append("\n");
-        statusBuilder.append("\n");
+        statusBuilder.append("\n\n");
 
         Map<String, String> addedFilesMap = stagingArea.get().getAdded();
+        Set<String> removedFilesMap = stagingArea.get().getRemoved();
 
         // Staged Files
         statusBuilder.append("=== Staged Files ===").append("\n").append("\n");
         appendFileNamesInOrder(statusBuilder, addedFilesMap.keySet());
-        statusBuilder.append("\n");
+        statusBuilder.append("\n\n");
 
         // Removed Files
         statusBuilder.append("=== Removed Files ===").append("\n").append("\n");
-        statusBuilder.append("\n");
+        appendFileNamesInOrder(statusBuilder, removedFilesMap);
+        statusBuilder.append("\n\n");
 
         // Modifications Not Staged For Commit
         statusBuilder.append("=== Modifications Not Staged For Commit ===").append("\n").append("\n");
+        List<String> modifiedNotStageFilePaths = new ArrayList<>();
+        Set<String> deletedNotStageFilesPaths = new HashSet<>();
 
         Map<String, String> currentFilesMap = getCurrentFilesMap();
-        statusBuilder.append("\n");
+        Map<String, String> trackedFilesMap = HEADCommit.get().getTracked();
+
+        trackedFilesMap.putAll(addedFilesMap);
+        for (String filePath : removedFilesMap) {
+            trackedFilesMap.remove(filePath);
+        }
+        for (Map.Entry<String, String> entry : trackedFilesMap.entrySet()) {
+            String filePath = entry.getKey();
+            String blobId = entry.getValue();
+
+            String currentFileBlobId = currentFilesMap.get(filePath);
+
+            if (currentFileBlobId != null) {
+                // Current file be tracked but content changed but not staged
+                if (!currentFileBlobId.equals(blobId)) {
+                    modifiedNotStageFilePaths.add(filePath);
+                }
+                // remove it from untracked files
+                currentFilesMap.remove(filePath);
+            } else {
+                // Current file does not be tracked
+                modifiedNotStageFilePaths.add(filePath);
+                deletedNotStageFilesPaths.add(filePath);
+            }
+        }
+
+        modifiedNotStageFilePaths.sort(String::compareTo);
+
+        for (String filePath : modifiedNotStageFilePaths) {
+            String fileName = Paths.get(filePath).getFileName().toString();
+            statusBuilder.append(fileName);
+            if (deletedNotStageFilesPaths.contains(filePath)) {
+                statusBuilder.append(" ").append("(deleted)");
+            } else {
+                statusBuilder.append(" ").append("(modified)");
+            }
+            statusBuilder.append("\n");
+        }
+        statusBuilder.append("\n\n");
 
         // Untracked Files
         statusBuilder.append("=== Untracked Files ===").append("\n").append("\n");
@@ -250,5 +292,15 @@ public class Repository {
         Commit newCommit = new Commit(message, parents, newTrackedFilesMap);
         newCommit.save();
         setBranchPointer(currentBranch.get(), newCommit.getId());
+    }
+
+    /** The remove command. */
+    public void remove(String fileName) {
+       File file = getFileFromCWD(fileName);
+       if (stagingArea.get().remove(file)) {
+           stagingArea.get().save();
+       } else {
+           exit("No reason to remove the file.");
+       }
     }
 }

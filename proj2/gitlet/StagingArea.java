@@ -47,6 +47,20 @@ public class StagingArea implements Serializable {
         Blob blob = new Blob(file);
         String blobId = blob.getId();
 
+        // Check if the file be tracked
+        String trackedBlobId = tracked.get(filePath);
+        if (trackedBlobId != null) {
+            // If the file be tracked and file content unchanged, remove it from added and removed.
+            if (trackedBlobId.equals(blobId)) {
+                if (added.remove(filePath) != null) {
+                    return true;
+                }
+                return removed.remove(filePath);
+            }
+        }
+
+        // put method return old value if filePath exist
+        // return null if filePath doesn't exist
         String oldBlobId = added.put(filePath, blobId);
         if (oldBlobId != null && oldBlobId.equals(blobId)) {
             return false;
@@ -57,6 +71,7 @@ public class StagingArea implements Serializable {
         }
         return true;
     }
+
 
     /** Get added files Map */
     public Map<String, String> getAdded() {
@@ -87,5 +102,23 @@ public class StagingArea implements Serializable {
         }
         clear();
         return tracked;
+    }
+
+    /** Remove file. */
+    public boolean remove(File file) {
+        String filePath = file.getPath();
+
+        String addedBlobId = added.remove(filePath);
+        if (addedBlobId != null) {
+            return true;
+        }
+
+        if (tracked.get(filePath) != null) {
+            if (file.exists()) {
+               file.delete();
+            }
+            return removed.add(filePath);
+        }
+        return false;
     }
 }
