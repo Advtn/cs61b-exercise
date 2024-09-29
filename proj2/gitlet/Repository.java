@@ -69,7 +69,7 @@ public class Repository {
        StagingArea s = INDEX.exists()
            ? StagingArea.fromFile()
            : new StagingArea();
-//       s.setTracked(HEADCommit.get().getTracked());
+       s.setTracked(HEADCommit.get().getTracked());
        return s;
     });
 
@@ -112,10 +112,10 @@ public class Repository {
     }
 
     /**
-     * Set the branch.
+     * Set the branch point to new commit.
      * write the commit id to the branch file.
      * */
-    private static void setBranch(String branchName, String commitId) {
+    private static void setBranchPointer(String branchName, String commitId) {
         File branchFile = getBranchFile(branchName);
         writeContents(branchFile, commitId);
     }
@@ -139,7 +139,7 @@ public class Repository {
     private static void createInitialCommit() {
         Commit initialCommit = new Commit();
         initialCommit.save();
-        setBranch(DEFAULT_BRANCH_NAME, initialCommit.getId());
+        setBranchPointer(DEFAULT_BRANCH_NAME, initialCommit.getId());
     }
 
     /** Add file to the staging area. */
@@ -175,7 +175,16 @@ public class Repository {
     public void log() {
         StringBuilder logBuilder = new StringBuilder();
         Commit currentCommit = HEADCommit.get();
-        logBuilder.append(currentCommit.getLog());
+        while (true) {
+            logBuilder.append(currentCommit.getLog()).append("\n");
+            List<String> parentCommitIds = currentCommit.getParents();
+            if (parentCommitIds.isEmpty()) {
+                break;
+            }
+            String firstParentCommitId = parentCommitIds.get(0);
+            currentCommit = Commit.fromFile(firstParentCommitId);
+        }
+
         System.out.println(logBuilder);
     }
 
@@ -227,5 +236,19 @@ public class Repository {
             String fileName = Paths.get(filePath).getFileName().toString();
             stringBuilder.append(fileName).append("\n").append("\n");
         }
+    }
+
+    /** The commit command. */
+    public void commit(String message) {
+        if (stagingArea.get().isClean()) {
+            exit("No changes added to the commit.");
+        }
+        Map<String, String> newTrackedFilesMap = stagingArea.get().commit();
+        stagingArea.get().save();
+        List<String> parents = new ArrayList<>();
+        parents.add(HEADCommit.get().getId());
+        Commit newCommit = new Commit(message, parents, newTrackedFilesMap);
+        newCommit.save();
+        setBranchPointer(currentBranch.get(), newCommit.getId());
     }
 }

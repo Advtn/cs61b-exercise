@@ -3,7 +3,9 @@ package gitlet;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static gitlet.Utils.readObject;
 import static gitlet.Utils.writeObject;
@@ -11,11 +13,17 @@ import static gitlet.Utils.writeObject;
 /** The staging area representation. */
 public class StagingArea implements Serializable {
 
-    /** The tracked files Map with file path as key and SHA1 id as value. */
+    /**
+     * The tracked files Map with file path as key and SHA1 id as value.
+     * After git add, the file will be tracked.
+     * */
     private Map<String, String> tracked;
 
     /** The added files Map in the staging area. */
     private final Map<String, String> added = new HashMap<>();
+
+    /** The removed files Set with file path as key. */
+    private final Set<String> removed = new HashSet<>();
 
     /** Get a StagingArea instance from the INDEX file. */
     public static StagingArea fromFile() {
@@ -50,8 +58,34 @@ public class StagingArea implements Serializable {
         return true;
     }
 
-    /** Get added Map */
+    /** Get added files Map */
     public Map<String, String> getAdded() {
         return added;
+    }
+
+    /** Get removed files Set. */
+    public Set<String> getRemoved() {
+        return removed;
+    }
+
+    /** Check whether staging area is clean. */
+    public boolean isClean() {
+        return added.isEmpty() && removed.isEmpty();
+    }
+
+    /** Clear the staging area.*/
+    public void clear() {
+        added.clear();
+        removed.clear();
+    }
+
+    /** Perform a commit. Return tracked files Map after commit. */
+    public Map<String, String> commit() {
+        tracked.putAll(added);
+        for (String filePath : removed) {
+            tracked.remove(filePath);
+        }
+        clear();
+        return tracked;
     }
 }

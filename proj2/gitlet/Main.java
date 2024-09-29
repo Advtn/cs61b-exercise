@@ -28,7 +28,10 @@ public class Main {
                 new Repository().add(fileName);
                 break;
             case "commit":
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
+                String message = args[1];
+                new Repository().commit(message);
                 break;
             case "rm":
                 validateNumArgs(args, 2);
