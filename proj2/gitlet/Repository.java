@@ -3,6 +3,7 @@ package gitlet;
 import jh61b.junit.In;
 
 import java.io.File;
+import java.net.StandardSocketOptions;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -120,6 +121,10 @@ public class Repository {
         writeContents(branchFile, commitId);
     }
 
+    private static void setBranchPointer(File branchFile, String commitId) {
+        writeContents(branchFile, commitId);
+    }
+
     /**
      * Get branch file.
      * generate branch file in the heads directory.
@@ -194,7 +199,14 @@ public class Repository {
 
         // Branches
         statusBuilder.append("=== Branches ===").append("\n").append("\n");
-        statusBuilder.append("*").append(currentBranch.get()).append("\n");
+        statusBuilder.append("*").append(currentBranch.get()).append("\n\n");
+        String[] branchNames = HEADS_DIR.list((dir, name) -> !name.equals(currentBranch.get()));
+        if (branchNames != null) {
+            Arrays.sort(branchNames);
+            for (String branchName : branchNames) {
+                statusBuilder.append(branchName).append("\n");
+            }
+        }
         statusBuilder.append("\n\n");
 
         Map<String, String> addedFilesMap = stagingArea.get().getAdded();
@@ -252,7 +264,7 @@ public class Repository {
             } else {
                 statusBuilder.append(" ").append("(modified)");
             }
-            statusBuilder.append("\n");
+            statusBuilder.append("\n\n");
         }
         statusBuilder.append("\n\n");
 
@@ -302,5 +314,19 @@ public class Repository {
        } else {
            exit("No reason to remove the file.");
        }
+    }
+
+    /** The commit command. */
+    public void find(String commitMessage) {
+
+    }
+
+    /** Creates a new branch with the given name. */
+    public void branch(String newBranchName) {
+        File newBranchFile = getBranchFile(newBranchName);
+        if (newBranchFile.exists()) {
+            exit("A branch with that name already exists.");
+        }
+        setBranchPointer(newBranchFile, HEADCommit.get().getId());
     }
 }

@@ -54,6 +54,8 @@ public class Main {
             case "find" -> {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
+                String commitMessage = args[1];
+                new Repository().find(commitMessage);
             }
             case "status" -> {
                 Repository.checkWorkingDir();
@@ -64,7 +66,10 @@ public class Main {
                 validateNumArgs(args, 1);
             }
             case "branch" -> {
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
+                String branchName = args[1];
+                new Repository().branch(branchName);
             }
             case "rm-branch" ->{
                 validateNumArgs(args, 2);
