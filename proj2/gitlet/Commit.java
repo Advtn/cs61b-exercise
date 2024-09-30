@@ -107,6 +107,16 @@ public class Commit implements Serializable {
         return tracked;
     }
 
+    /** restore file from commit. */
+    public boolean restoreTracked(String filePath) {
+        String blobId = tracked.get(filePath);
+        if (blobId == null) {
+            return false;
+        }
+        Blob.fromFile(blobId).writeContentToSource();
+        return true;
+    }
+
     /**
      * Get the parents commit id.
      */

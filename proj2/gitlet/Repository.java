@@ -96,10 +96,10 @@ public class Repository {
         if (GITLET_DIR.exists()) {
             exit("A Gitlet version-control system already exists in the current directory.");
         }
-        GITLET_DIR.mkdir();
-        OBJECTS_DIR.mkdir();
-        REFS_DIR.mkdir();
-        HEADS_DIR.mkdir();
+        mkdir(GITLET_DIR);
+        mkdir(OBJECTS_DIR);
+        mkdir(REFS_DIR);
+        mkdir(HEADS_DIR);
         setCurrentBranch(DEFAULT_BRANCH_NAME);
         createInitialCommit();
     }
@@ -204,7 +204,7 @@ public class Repository {
         if (branchNames != null) {
             Arrays.sort(branchNames);
             for (String branchName : branchNames) {
-                statusBuilder.append(branchName).append("\n");
+                statusBuilder.append(branchName).append("\n\n");
             }
         }
         statusBuilder.append("\n\n");
@@ -328,5 +328,30 @@ public class Repository {
             exit("A branch with that name already exists.");
         }
         setBranchPointer(newBranchFile, HEADCommit.get().getId());
+    }
+
+    /** Deletes the branch with the given name. */
+    public void removeBranch(String branchName) {
+        File branchFile = getBranchFile(branchName);
+        if (!branchFile.exists()) {
+            exit("A branch with that name does not exist.");
+        }
+        if (branchName.equals(currentBranch.get())) {
+            exit("Cannot remove the current branch.");
+        }
+        rm(branchFile);
+    }
+
+    /** Checkout file from HEAD commit. */
+    public void checkout(String fileName) {
+        String filePath = getFileFromCWD(fileName).getPath();
+        if (!HEADCommit.get().restoreTracked(filePath)) {
+            exit("File does not exist in that commit.");
+        }
+    }
+
+    /** Checkout file from the given commit id. */
+    public void checkout(String commitId, String fileName) {
+
     }
 }

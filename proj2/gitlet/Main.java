@@ -63,7 +63,32 @@ public class Main {
                 new Repository().status();
             }
             case "checkout" -> {
-                validateNumArgs(args, 1);
+                Repository.checkWorkingDir();
+                Repository repository = new Repository();
+                switch (args.length) {
+                    // java gitlet.Main checkout -- [file name]
+                    // revert the given file to the HEAD commit version
+                    case 3 -> {
+                        if (!args[1].equals("--")) {
+                            exit("Incorrect operands.");
+                        }
+                        String fileName = args[2];
+                        repository.checkout(fileName);
+                    }
+                    case 4 -> {
+                        if (!args[2].equals("--")) {
+                            exit("Incorrect operands.");
+                        }
+                        String commitId = args[1];
+                        String fileName = args[3];
+                        repository.checkout(commitId, fileName);
+                    }
+                    case 2 -> {
+                        String branchName = args[1];
+
+                    }
+                    default -> exit("Incorrect operands.");
+                }
             }
             case "branch" -> {
                 Repository.checkWorkingDir();
@@ -72,12 +97,17 @@ public class Main {
                 new Repository().branch(branchName);
             }
             case "rm-branch" ->{
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
+                String branchName = args[1];
+                new Repository().removeBranch(branchName);
             }
             case "reset" -> {
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
             }
             case "merge" -> {
+                Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
             }
             default -> exit("No command with that name exists.");

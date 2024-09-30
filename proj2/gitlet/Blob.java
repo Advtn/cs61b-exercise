@@ -55,6 +55,13 @@ public class Blob implements Serializable {
         return file;
     }
 
+    /**
+     * Write the file content back to the source file.
+     */
+    public void writeContentToSource() {
+        writeContents(source, content);
+    }
+
     /** Generate Blob id by sha1 */
     public static String generateId(File sourceFile) {
         String filePath = sourceFile.getPath();

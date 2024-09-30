@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static gitlet.MyUtils.rm;
 import static gitlet.Utils.readObject;
 import static gitlet.Utils.writeObject;
 
@@ -115,7 +116,7 @@ public class StagingArea implements Serializable {
 
         if (tracked.get(filePath) != null) {
             if (file.exists()) {
-               file.delete();
+               rm(file);
             }
             return removed.add(filePath);
         }
