@@ -2,6 +2,8 @@ package gitlet;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.function.Supplier;
 
@@ -55,7 +57,7 @@ public class MyUtils {
      */
     public static File getObjectFile(String id) {
         String dirName = getObjectDirName(id);
-        String fileName = getObjectName(id);
+        String fileName = getObjectFileName(id);
         return join(Repository.OBJECTS_DIR, dirName, fileName);
     }
 
@@ -65,7 +67,7 @@ public class MyUtils {
     }
 
     /** Get the object file name. */
-     public static String getObjectName(String id) {
+     public static String getObjectFileName(String id) {
         return id.substring(2);
      }
 
@@ -80,5 +82,20 @@ public class MyUtils {
             mkdir(dir);
         }
         writeObject(file, obj);
+    }
+
+    /**
+     * Tells if the deserialized object instance of given class.
+     *
+     * @param file File instance
+     * @param c    Target class
+     * @return true if is instance
+     */
+    public static boolean isFileInstanceOf(File file, Class<?> c) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+            return c.isInstance(in.readObject());
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 }

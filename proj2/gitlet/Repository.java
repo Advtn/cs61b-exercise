@@ -352,6 +352,49 @@ public class Repository {
 
     /** Checkout file from the given commit id. */
     public void checkout(String commitId, String fileName) {
-
+        commitId = getActualCommitId(commitId);
+        String filePath = getFileFromCWD(fileName).getPath();
+        if (!Commit.fromFile(commitId).restoreTracked(filePath)) {
+            exit("File does not exist in that commit.");
+        }
     }
+
+    /** Get whole commit id. Exit with message if it does not exit. */
+    @SuppressWarnings("ConstantConditions")
+    private static String getActualCommitId(String commitId) {
+        if (commitId.length() < UID_LENGTH) {
+            if (commitId.length() < 4) {
+                exit("Commit id should contain at least 4 characters.");
+            }
+            String objectDirName = getObjectDirName(commitId);
+            File objectDir = join(OBJECTS_DIR, objectDirName);
+            if (!objectDir.exists()) {
+                exit("No commit with that id exists.");
+            }
+
+            boolean isFound = false;
+            String objectFileNamePrefix = getObjectFileName(commitId);
+
+            for (File objectFile : objectDir.listFiles()) {
+                String objectFileName = objectFile.getName();
+                if (objectFileName.startsWith(objectFileNamePrefix) && isFileInstanceOf(objectFile, Commit.class)) {
+                    if (isFound) {
+                        exit("More than 1 commit has the same id prefix.");
+                    }
+                    commitId = objectDirName + objectFileName;
+                    isFound = true;
+                }
+            }
+            if (!isFound) {
+                exit("No commit with that id exists.");
+            }
+        } else {
+            if (!getObjectFile(commitId).exists()) {
+                exit("No commit with that id exists.");
+            }
+        }
+        return commitId;
+    }
+
+
 }
