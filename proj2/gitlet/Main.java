@@ -55,7 +55,7 @@ public class Main {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
                 String commitMessage = args[1];
-                new Repository().find(commitMessage);
+//                new Repository().find(commitMessage);
             }
             case "status" -> {
                 Repository.checkWorkingDir();
@@ -85,7 +85,7 @@ public class Main {
                     }
                     case 2 -> {
                         String branchName = args[1];
-
+                        repository.checkoutBranch(branchName);
                     }
                     default -> exit("Incorrect operands.");
                 }

@@ -359,6 +359,64 @@ public class Repository {
         }
     }
 
+    /** Checkout branch from the given branch name. */
+    public void checkoutBranch(String targetBranchName) {
+        File targetBranchFile = getBranchFile(targetBranchName);
+        if (!targetBranchFile.exists()) {
+            exit("No such branch exists.");
+        }
+        if (targetBranchName.equals(currentBranch.get())) {
+            exit("No need to checkout the current branch.");
+        }
+        Commit targetBranchCommit = getBranchCommit(targetBranchName);
+        checkUntracked(targetBranchCommit);
+        checkoutCommit(targetBranchCommit);
+        setCurrentBranch(targetBranchName);
+    }
+
+    /** Checkout to specific commit. */
+    private void checkoutCommit(Commit targetCommit) {
+        stagingArea.get().clear();
+        stagingArea.get().save();
+        for (File file : currentFiles.get()) {
+            rm(file);
+        }
+        targetCommit.restoreAllTracked();
+    }
+
+    /** Exit with message if target commit would overwrite the untracked files. */
+    private void checkUntracked(Commit targetCommit) {
+        Map<String, String> currentFilesMap = getCurrentFilesMap();
+        Map<String, String> trackedFilesMap = HEADCommit.get().getTracked();
+        Map<String, String> addedFilesMap = stagingArea.get().getAdded();
+        Set<String> removedFilesPathSet = stagingArea.get().getRemoved();
+
+        List<String> untrackedFilePaths = new ArrayList<>();
+
+        for (String filePath : currentFilesMap.keySet()) {
+            if (trackedFilesMap.containsKey(filePath)) {
+                // tracked but now deleted.
+                if (removedFilesPathSet.contains(filePath)) {
+                    untrackedFilePaths.add(filePath);
+                }
+            } else {
+                if (!addedFilesMap.containsKey(filePath)) {
+                    untrackedFilePaths.add(filePath);
+                }
+            }
+        }
+
+        Map<String, String> targetCommitTrackedFilesMap = targetCommit.getTracked();
+
+        for (String filePath : untrackedFilePaths) {
+            String blobId = currentFilesMap.get(filePath);
+            String targetBlobId = targetCommitTrackedFilesMap.get(filePath);
+            if (!blobId.equals(targetBlobId)) {
+                exit("There is an untracked file in the way; delete it, or add and commit it first.");
+            }
+        }
+    }
+
     /** Get whole commit id. Exit with message if it does not exit. */
     @SuppressWarnings("ConstantConditions")
     private static String getActualCommitId(String commitId) {

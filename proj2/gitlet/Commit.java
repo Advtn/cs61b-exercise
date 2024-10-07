@@ -117,6 +117,13 @@ public class Commit implements Serializable {
         return true;
     }
 
+    /** restore all tracked files, overwriting the exising ones. */
+    public void restoreAllTracked() {
+        for (String blobId : tracked.values()) {
+            Blob.fromFile(blobId).writeContentToSource();
+        }
+    }
+
     /**
      * Get the parents commit id.
      */
