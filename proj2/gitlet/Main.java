@@ -76,6 +76,8 @@ public class Main {
                         String fileName = args[2];
                         repository.checkout(fileName);
                     }
+                    // java gitlet.Main checkout [commit id] -- [file name]
+                    // revert the given file to the given commit version
                     case 4 -> {
                         if (!args[2].equals("--")) {
                             exit("Incorrect operands.");
@@ -84,6 +86,8 @@ public class Main {
                         String fileName = args[3];
                         repository.checkout(commitId, fileName);
                     }
+                    // java gitlet.Main checkout [branch name]
+                    // checkout branch
                     case 2 -> {
                         String branchName = args[1];
                         repository.checkoutBranch(branchName);
@@ -112,6 +116,8 @@ public class Main {
             case "merge" -> {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
+                String branchName = args[1];
+                new Repository().merge(branchName);
             }
             default -> exit("No command with that name exists.");
         }

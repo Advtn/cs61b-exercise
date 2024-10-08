@@ -64,7 +64,7 @@ public class Repository {
     });
 
     /** The commit that HEAD points to. */
-    private final Lazy<Commit> HEADCommit = lazy(() -> getBranchCommit(currentBranch.get()));
+    private final Lazy<Commit> HEADCommit = lazy(() -> getBranchHeadCommit(currentBranch.get()));
 
     /** The staging area. */
     private final Lazy<StagingArea> stagingArea = lazy(() -> {
@@ -117,12 +117,12 @@ public class Repository {
      * Set the branch point to new commit.
      * write the commit id to the branch file.
      * */
-    private static void setBranchPointer(String branchName, String commitId) {
-        File branchFile = getBranchFile(branchName);
+    private static void setBranchHeadCommit(String branchName, String commitId) {
+        File branchFile = getBranchHeadFile(branchName);
         writeContents(branchFile, commitId);
     }
 
-    private static void setBranchPointer(File branchFile, String commitId) {
+    private static void setBranchHeadCommit(File branchFile, String commitId) {
         writeContents(branchFile, commitId);
     }
 
@@ -130,13 +130,13 @@ public class Repository {
      * Get branch file.
      * generate branch file in the heads directory.
      * */
-    private static File getBranchFile(String branchName) {
+    private static File getBranchHeadFile(String branchName) {
         return join(BRANCH_HEADS_DIR, branchName);
     }
 
     /** Get commit that branch pointed. */
-    private static Commit getBranchCommit(String branchName) {
-        File branchFile = getBranchFile(branchName);
+    private static Commit getBranchHeadCommit(String branchName) {
+        File branchFile = getBranchHeadFile(branchName);
         String branchCommitId = readContentsAsString(branchFile);
         return Commit.fromFile(branchCommitId);
     }
@@ -145,7 +145,7 @@ public class Repository {
     private static void createInitialCommit() {
         Commit initialCommit = new Commit();
         initialCommit.save();
-        setBranchPointer(DEFAULT_BRANCH_NAME, initialCommit.getId());
+        setBranchHeadCommit(DEFAULT_BRANCH_NAME, initialCommit.getId());
     }
 
     /** Add file to the staging area. */
@@ -304,7 +304,7 @@ public class Repository {
         parents.add(HEADCommit.get().getId());
         Commit newCommit = new Commit(message, parents, newTrackedFilesMap);
         newCommit.save();
-        setBranchPointer(currentBranch.get(), newCommit.getId());
+        setBranchHeadCommit(currentBranch.get(), newCommit.getId());
     }
 
     /** The remove command. */
@@ -319,16 +319,16 @@ public class Repository {
 
     /** Creates a new branch with the given name. */
     public void branch(String newBranchName) {
-        File newBranchFile = getBranchFile(newBranchName);
+        File newBranchFile = getBranchHeadFile(newBranchName);
         if (newBranchFile.exists()) {
             exit("A branch with that name already exists.");
         }
-        setBranchPointer(newBranchFile, HEADCommit.get().getId());
+        setBranchHeadCommit(newBranchFile, HEADCommit.get().getId());
     }
 
     /** Deletes the branch with the given name. */
     public void removeBranch(String branchName) {
-        File branchFile = getBranchFile(branchName);
+        File branchFile = getBranchHeadFile(branchName);
         if (!branchFile.exists()) {
             exit("A branch with that name does not exist.");
         }
@@ -357,14 +357,14 @@ public class Repository {
 
     /** Checkout branch from the given branch name. */
     public void checkoutBranch(String targetBranchName) {
-        File targetBranchFile = getBranchFile(targetBranchName);
+        File targetBranchFile = getBranchHeadFile(targetBranchName);
         if (!targetBranchFile.exists()) {
             exit("No such branch exists.");
         }
         if (targetBranchName.equals(currentBranch.get())) {
             exit("No need to checkout the current branch.");
         }
-        Commit targetBranchCommit = getBranchCommit(targetBranchName);
+        Commit targetBranchCommit = getBranchHeadCommit(targetBranchName);
         checkUntracked(targetBranchCommit);
         checkoutCommit(targetBranchCommit);
         setCurrentBranch(targetBranchName);
@@ -389,12 +389,14 @@ public class Repository {
 
         List<String> untrackedFilePaths = new ArrayList<>();
 
+        // 遍历 CWD，检查当前头提交是否跟踪该文件，
         for (String filePath : currentFilesMap.keySet()) {
             if (trackedFilesMap.containsKey(filePath)) {
-                // tracked but now deleted.
+                // 如果跟踪并且暂存区显示已被移除，加入未跟踪列表
                 if (removedFilesPathSet.contains(filePath)) {
                     untrackedFilePaths.add(filePath);
                 }
+                // 如果未跟踪并且不在暂存区，加入未跟踪列表
             } else {
                 if (!addedFilesMap.containsKey(filePath)) {
                     untrackedFilePaths.add(filePath);
@@ -404,6 +406,7 @@ public class Repository {
 
         Map<String, String> targetCommitTrackedFilesMap = targetCommit.getTracked();
 
+        // 检查未跟踪文件是否改变，如果改变则打印消息并退出程序
         for (String filePath : untrackedFilePaths) {
             String blobId = currentFilesMap.get(filePath);
             String targetBlobId = targetCommitTrackedFilesMap.get(filePath);
@@ -450,9 +453,15 @@ public class Repository {
         return commitId;
     }
 
-    /** Checks out all the files tracked by the given commit. */
+    /** Checks out all the files tracked by the given commit.
+     *  set current branch head to point to the given commit.
+     * */
     public void reset(String commitId) {
         commitId = getActualCommitId(commitId);
+        Commit targetCommit = Commit.fromFile(commitId);
+        checkUntracked(targetCommit);
+        checkoutCommit(targetCommit);
+        setBranchHeadCommit(currentBranch.get(), commitId);
     }
 
     /** The find command. */
@@ -502,6 +511,7 @@ public class Repository {
         //根据分支头提交ID，得到Commit实例对象，加入queueToHoldCommits 队列
         for (File branchHeadFile : branchHeadFiles) {
             String branchHeadCommitId = readContentsAsString(branchHeadFile);
+            // if commit has been in checkedCommitIds, do not join the queue.
             if (checkedCommitIds.contains(branchHeadCommitId)) {
                 continue;
             }
@@ -526,6 +536,55 @@ public class Repository {
                 Commit parentCommit = Commit.fromFile(parentCommitId);
                 queueToHoldCommits.add(parentCommit);
             }
+        }
+    }
+
+    /** Get the latest common ancestor commit of the two commits. */
+    @SuppressWarnings("ConstantConditions")
+    private static Commit getLatestCommonAncestorCommit(Commit commitA, Commit commitB) {
+        Comparator<Commit> commitComparator = Comparator.comparing(Commit::getDate).reversed();
+        Queue<Commit> commitQueue = new PriorityQueue<>(commitComparator);
+        commitQueue.add(commitA);
+        commitQueue.add(commitB);
+        Set<String> checkedCommitIds = new HashSet<>();
+        while (true) {
+            Commit latestCommit = commitQueue.poll();
+            List<String> parentCommitIds = latestCommit.getParents();
+            String firstParentCommitId = parentCommitIds.get(0);
+            Commit firstParentCommit = Commit.fromFile(firstParentCommitId);
+            if (checkedCommitIds.contains(firstParentCommitId)) {
+                return firstParentCommit;
+            }
+            commitQueue.add(firstParentCommit);
+            checkedCommitIds.add(firstParentCommitId);
+        }
+    }
+
+    /** Merge current branch with the given branch. */
+    public void merge(String targetBranchName) {
+        File targetBranchHeadFile = getBranchHeadFile(targetBranchName);
+        if (!targetBranchHeadFile.exists()) {
+            exit("A branch with that name does not exist.");
+        }
+        if (targetBranchName.equals(currentBranch.get())) {
+            exit("Cannot merge a branch with itself.");
+        }
+        if (!stagingArea.get().isClean()) {
+            exit("You have uncommitted changes.");
+        }
+        Commit targetBranchHeadCommit = getBranchHeadCommit(targetBranchName);
+        checkUntracked(targetBranchHeadCommit);
+
+        Commit lcaCommit = getLatestCommonAncestorCommit(HEADCommit.get(), targetBranchHeadCommit);
+        String lcaCommitId = lcaCommit.getId();
+
+        if (lcaCommitId.equals(targetBranchHeadCommit.getId())) {
+            exit("Given branch is an ancestor of the current branch.");
+        }
+        if (lcaCommitId.equals(currentBranch.get())) {
+            checkoutCommit(targetBranchHeadCommit);
+            setCurrentBranch(targetBranchName);
+            exit("Current branch fast-forwarded.");
         }
     }
 }
