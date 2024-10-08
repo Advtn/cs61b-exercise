@@ -143,9 +143,16 @@ public class Commit implements Serializable {
 
     /** Get commit log. */
     public String getLog() {
-        StringBuffer logBuilder = new StringBuffer();
+        StringBuilder logBuilder = new StringBuilder();
         logBuilder.append("===").append("\n");
         logBuilder.append("commit ").append(id).append("\n");
+        if (parents.size() > 1) {
+            logBuilder.append("Merge:");
+            for (String parent : parents) {
+                logBuilder.append(" ").append(parent, 0, 7);
+            }
+            logBuilder.append("\n");
+        }
         logBuilder.append("Date: ").append(getTimestamp()).append("\n");
         logBuilder.append(message).append("\n");
         return logBuilder.toString();

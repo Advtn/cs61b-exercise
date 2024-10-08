@@ -6,6 +6,7 @@ import java.io.File;
 import java.net.StandardSocketOptions;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static gitlet.Utils.*;
 import static gitlet.MyUtils.*;
@@ -39,7 +40,7 @@ public class Repository {
     private static final File REFS_DIR = join(GITLET_DIR, "refs");
 
     /** The heads directory, saved the branches.*/
-    private static final File HEADS_DIR = join(REFS_DIR, "heads");
+    private static final File BRANCH_HEADS_DIR = join(REFS_DIR, "heads");
 
     /**
      * The HEAD file.
@@ -99,7 +100,7 @@ public class Repository {
         mkdir(GITLET_DIR);
         mkdir(OBJECTS_DIR);
         mkdir(REFS_DIR);
-        mkdir(HEADS_DIR);
+        mkdir(BRANCH_HEADS_DIR);
         setCurrentBranch(DEFAULT_BRANCH_NAME);
         createInitialCommit();
     }
@@ -130,7 +131,7 @@ public class Repository {
      * generate branch file in the heads directory.
      * */
     private static File getBranchFile(String branchName) {
-        return join(HEADS_DIR, branchName);
+        return join(BRANCH_HEADS_DIR, branchName);
     }
 
     /** Get commit that branch pointed. */
@@ -200,7 +201,7 @@ public class Repository {
         // Branches
         statusBuilder.append("=== Branches ===").append("\n").append("\n");
         statusBuilder.append("*").append(currentBranch.get()).append("\n\n");
-        String[] branchNames = HEADS_DIR.list((dir, name) -> !name.equals(currentBranch.get()));
+        String[] branchNames = BRANCH_HEADS_DIR.list((dir, name) -> !name.equals(currentBranch.get()));
         if (branchNames != null) {
             Arrays.sort(branchNames);
             for (String branchName : branchNames) {
@@ -454,5 +455,68 @@ public class Repository {
         return commitId;
     }
 
+    /** Checks out all the files tracked by the given commit. */
+    public void reset(String commitId) {
+        commitId = getActualCommitId(commitId);
+    }
 
+    /** Print all commit logs ever made. */
+    public static void globalLog() {
+        StringBuilder logBuilder = new StringBuilder();
+        forEachCommitInOrder(commit -> logBuilder.append(commit.getLog()).append("\n"));
+        System.out.print(logBuilder);
+    }
+
+    /** Iterate all commits in the order of created date */
+    private static void forEachCommitInOrder(Consumer<Commit> cb) {
+        // Sort commits by date, with the latest at the front
+        Comparator<Commit> commitComparator = Comparator.comparing(Commit::getDate).reversed();
+        Queue<Commit> commitsPriorityQueue = new PriorityQueue<>(commitComparator);
+        forEachCommit(cb, commitsPriorityQueue);
+    }
+
+    /** Iterate all commits and execute callback function on each of them.*/
+    private static void forEachCommit(Consumer<Commit> cb) {
+        Queue<Commit> commitsQueue = new ArrayDeque<>();
+        forEachCommit(cb, commitsQueue);
+    }
+
+    /** Helper method to iterate all commit. */
+    @SuppressWarnings("ConstantConditions")
+    private static void forEachCommit(Consumer<Commit> cb, Queue<Commit> queueToHoldCommits) {
+        Set<String> checkedCommitIds = new HashSet<>();
+
+        File[] branchHeadFiles = BRANCH_HEADS_DIR.listFiles();
+        Arrays.sort(branchHeadFiles, Comparator.comparing(File::getName));
+
+        //遍历所有分支，读取分支头提交ID，加入checkedCommitIds集合
+        //根据分支头提交ID，得到Commit实例对象，加入queueToHoldCommits 队列
+        for (File branchHeadFile : branchHeadFiles) {
+            String branchHeadCommitId = readContentsAsString(branchHeadFile);
+            if (checkedCommitIds.contains(branchHeadCommitId)) {
+                continue;
+            }
+            checkedCommitIds.add(branchHeadCommitId);
+            Commit branchHeadCommit = Commit.fromFile(branchHeadCommitId);
+            queueToHoldCommits.add(branchHeadCommit);
+        }
+
+        //处理所有的 parent commit
+        while (true) {
+            Commit nextCommit = queueToHoldCommits.poll();
+            cb.accept(nextCommit);
+            List<String> parentCommitIds = nextCommit.getParents();
+            if (parentCommitIds.isEmpty()) {
+                break;
+            }
+            for (String parentCommitId : parentCommitIds) {
+                if (checkedCommitIds.contains(parentCommitId)) {
+                    continue;
+                }
+                checkedCommitIds.add(parentCommitId);
+                Commit parentCommit = Commit.fromFile(parentCommitId);
+                queueToHoldCommits.add(parentCommit);
+            }
+        }
+    }
 }

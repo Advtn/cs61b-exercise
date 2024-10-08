@@ -50,6 +50,7 @@ public class Main {
             case "global-log" -> {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 1);
+                Repository.globalLog();
             }
             case "find" -> {
                 Repository.checkWorkingDir();
@@ -105,6 +106,8 @@ public class Main {
             case "reset" -> {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
+                String commitId = args[1];
+                new Repository().reset(commitId);
             }
             case "merge" -> {
                 Repository.checkWorkingDir();
