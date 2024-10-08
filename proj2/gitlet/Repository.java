@@ -317,11 +317,6 @@ public class Repository {
        }
     }
 
-    /** The commit command. */
-    public void find(String commitMessage) {
-
-    }
-
     /** Creates a new branch with the given name. */
     public void branch(String newBranchName) {
         File newBranchFile = getBranchFile(newBranchName);
@@ -458,6 +453,20 @@ public class Repository {
     /** Checks out all the files tracked by the given commit. */
     public void reset(String commitId) {
         commitId = getActualCommitId(commitId);
+    }
+
+    /** The find command. */
+    public static void find(String commitMessage) {
+        StringBuilder resultBuilder = new StringBuilder();
+        forEachCommit(commit -> {
+            if (commit.getMessage().equals(commitMessage)) {
+                resultBuilder.append(commit.getId()).append("\n");
+            }
+        });
+        if (resultBuilder.length() == 0) {
+            exit("Found no commit with that message.");
+        }
+        System.out.print(resultBuilder);
     }
 
     /** Print all commit logs ever made. */

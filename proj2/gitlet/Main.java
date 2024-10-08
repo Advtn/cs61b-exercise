@@ -56,7 +56,7 @@ public class Main {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
                 String commitMessage = args[1];
-//                new Repository().find(commitMessage);
+                Repository.find(commitMessage);
             }
             case "status" -> {
                 Repository.checkWorkingDir();
