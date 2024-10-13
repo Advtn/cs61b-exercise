@@ -35,7 +35,7 @@ public class MyUtils {
      */
     public static void mkdir(File fileDir) {
         if (!fileDir.mkdir()) {
-            throw new IllegalArgumentException(String.format("mkdir: %s: Failed to create.", fileDir.getPath()));
+            System.out.printf("mkdir: %s: Failed to create.%n", fileDir.getPath());
         }
     }
 
@@ -46,7 +46,7 @@ public class MyUtils {
      */
     public static void rm(File file) {
         if (!file.delete()) {
-            throw new IllegalArgumentException(String.format("rm: %s: Failed to delete.", file.getPath()));
+            System.out.printf("rm: %s: Failed to delete.%n", file.getPath());
         }
     }
 
@@ -67,9 +67,9 @@ public class MyUtils {
     }
 
     /** Get the object file name. */
-     public static String getObjectFileName(String id) {
+    public static String getObjectFileName(String id) {
         return id.substring(2);
-     }
+    }
 
     /**
      * save object file by object's sha1 id.

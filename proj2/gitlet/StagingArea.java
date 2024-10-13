@@ -116,7 +116,7 @@ public class StagingArea implements Serializable {
 
         if (tracked.get(filePath) != null) {
             if (file.exists()) {
-               rm(file);
+                rm(file);
             }
             return removed.add(filePath);
         }

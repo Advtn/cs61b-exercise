@@ -19,7 +19,7 @@ public class Lazy<T> implements Supplier<T> {
     @Override
     public T get() {
         if (!initialized) {
-           synchronized (this) {
+            synchronized (this) {
                 if (!initialized) {
                     T t = delegate.get();
                     value = t;
@@ -27,7 +27,7 @@ public class Lazy<T> implements Supplier<T> {
                     delegate = null;
                     return t;
                 }
-           }
+            }
         }
         return value;
     }

@@ -67,7 +67,7 @@ public class Blob implements Serializable {
     public static String generateId(File sourceFile) {
         String filePath = sourceFile.getPath();
         byte[] fileContent = readContents(sourceFile);
-        return sha1(filePath,fileContent);
+        return sha1(filePath, fileContent);
     }
 
     /** get content as string .*/

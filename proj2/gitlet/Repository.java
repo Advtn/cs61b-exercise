@@ -1,15 +1,13 @@
 package gitlet;
 
-import jh61b.junit.In;
-
 import java.io.File;
-import java.net.StandardSocketOptions;
+import java.io.FilenameFilter;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static gitlet.Utils.*;
 import static gitlet.MyUtils.*;
+import static gitlet.Utils.*;
 
 /** Represents a gitlet repository.
  *
@@ -55,24 +53,24 @@ public class Repository {
     public static final File INDEX = join(GITLET_DIR, "index");
 
     /** Files in the current working directory. */
-    private static final Lazy<File[]> currentFiles = lazy(() -> CWD.listFiles(File::isFile));
+    private static final Lazy<File[]> CURRENT_FILES = lazy(() -> CWD.listFiles(File::isFile));
 
     /** The current branch name. */
-    private static final Lazy<String> currentBranch = lazy(() -> {
-        String HEADFileContent = readContentsAsString(HEAD);
-        return HEADFileContent.replace(HEAD_BRANCH_REF_PREFIX,"");
+    private static final Lazy<String> CURRENT_BRANCH = lazy(() -> {
+        String headFileContent = readContentsAsString(HEAD);
+        return headFileContent.replace(HEAD_BRANCH_REF_PREFIX, "");
     });
 
     /** The commit that HEAD points to. */
-    private final Lazy<Commit> HEADCommit = lazy(() -> getBranchHeadCommit(currentBranch.get()));
+    private final Lazy<Commit> headCommit = lazy(() -> getBranchHeadCommit(CURRENT_BRANCH.get()));
 
     /** The staging area. */
     private final Lazy<StagingArea> stagingArea = lazy(() -> {
-       StagingArea s = INDEX.exists()
+        StagingArea s = INDEX.exists()
            ? StagingArea.fromFile()
            : new StagingArea();
-       s.setTracked(HEADCommit.get().getTracked());
-       return s;
+        s.setTracked(headCommit.get().getTracked());
+        return s;
     });
 
     /** Exit if the repository at the current working directory is initialized. */
@@ -169,7 +167,7 @@ public class Repository {
     /** Get a Map of file paths and their SHA1 id from CWD. */
     private static Map<String, String> getCurrentFilesMap() {
         Map<String, String> filesMap = new HashMap<>();
-        for (File file : currentFiles.get()) {
+        for (File file : CURRENT_FILES.get()) {
             String filePath = file.getPath();
             String blobId = Blob.generateId(file);
             filesMap.put(filePath, blobId);
@@ -180,7 +178,7 @@ public class Repository {
     /** Print logs of the current branch. */
     public void log() {
         StringBuilder logBuilder = new StringBuilder();
-        Commit currentCommit = HEADCommit.get();
+        Commit currentCommit = headCommit.get();
         while (true) {
             logBuilder.append(currentCommit.getLog()).append("\n");
             List<String> parentCommitIds = currentCommit.getParents();
@@ -199,37 +197,38 @@ public class Repository {
         StringBuilder statusBuilder = new StringBuilder();
 
         // Branches
-        statusBuilder.append("=== Branches ===").append("\n").append("\n");
-        statusBuilder.append("*").append(currentBranch.get()).append("\n\n");
-        String[] branchNames = BRANCH_HEADS_DIR.list((dir, name) -> !name.equals(currentBranch.get()));
+        statusBuilder.append("=== Branches ===").append("\n");
+        statusBuilder.append("*").append(CURRENT_BRANCH.get()).append("\n");
+        FilenameFilter branchFilter = (dir, name) -> !name.equals(CURRENT_BRANCH.get());
+        String[] branchNames = BRANCH_HEADS_DIR.list(branchFilter);
         if (branchNames != null) {
             Arrays.sort(branchNames);
             for (String branchName : branchNames) {
-                statusBuilder.append(branchName).append("\n\n");
+                statusBuilder.append(branchName).append("\n");
             }
         }
-        statusBuilder.append("\n\n");
+        statusBuilder.append("\n");
 
         Map<String, String> addedFilesMap = stagingArea.get().getAdded();
         Set<String> removedFilesMap = stagingArea.get().getRemoved();
 
         // Staged Files
-        statusBuilder.append("=== Staged Files ===").append("\n").append("\n");
+        statusBuilder.append("=== Staged Files ===").append("\n");
         appendFileNamesInOrder(statusBuilder, addedFilesMap.keySet());
-        statusBuilder.append("\n\n");
+        statusBuilder.append("\n");
 
         // Removed Files
-        statusBuilder.append("=== Removed Files ===").append("\n").append("\n");
+        statusBuilder.append("=== Removed Files ===").append("\n");
         appendFileNamesInOrder(statusBuilder, removedFilesMap);
-        statusBuilder.append("\n\n");
+        statusBuilder.append("\n");
 
         // Modifications Not Staged For Commit
-        statusBuilder.append("=== Modifications Not Staged For Commit ===").append("\n").append("\n");
+        statusBuilder.append("=== Modifications Not Staged For Commit ===").append("\n");
         List<String> modifiedNotStageFilePaths = new ArrayList<>();
         Set<String> deletedNotStageFilesPaths = new HashSet<>();
 
         Map<String, String> currentFilesMap = getCurrentFilesMap();
-        Map<String, String> trackedFilesMap = HEADCommit.get().getTracked();
+        Map<String, String> trackedFilesMap = headCommit.get().getTracked();
 
         trackedFilesMap.putAll(addedFilesMap);
         for (String filePath : removedFilesMap) {
@@ -265,12 +264,12 @@ public class Repository {
             } else {
                 statusBuilder.append(" ").append("(modified)");
             }
-            statusBuilder.append("\n\n");
+            statusBuilder.append("\n");
         }
-        statusBuilder.append("\n\n");
+        statusBuilder.append("\n");
 
         // Untracked Files
-        statusBuilder.append("=== Untracked Files ===").append("\n").append("\n");
+        statusBuilder.append("=== Untracked Files ===").append("\n");
         appendFileNamesInOrder(statusBuilder, currentFilesMap.keySet());
         statusBuilder.append("\n");
 
@@ -279,17 +278,17 @@ public class Repository {
     }
 
     /** Append lines of file name in order from files paths Set to StringBuilder.*/
-    private static void appendFileNamesInOrder(StringBuilder stringBuilder, Collection<String> filePathCollection) {
-        List<String> filesPathList = new ArrayList<>(filePathCollection);
-        appendFileNamesInOrder(stringBuilder, filesPathList);
+    private static void appendFileNamesInOrder(StringBuilder sb, Collection<String> filePathColl) {
+        List<String> filesPathList = new ArrayList<>(filePathColl);
+        appendFileNamesInOrder(sb, filesPathList);
     }
 
     /** Append lines of file name in order from files paths Set to StringBuilder.*/
-    private static void appendFileNamesInOrder(StringBuilder stringBuilder, List<String> filePathList) {
+    private static void appendFileNamesInOrder(StringBuilder sb, List<String> filePathList) {
         filePathList.sort(String::compareTo);
         for (String filePath : filePathList) {
             String fileName = Paths.get(filePath).getFileName().toString();
-            stringBuilder.append(fileName).append("\n").append("\n");
+            sb.append(fileName).append("\n").append("\n");
         }
     }
 
@@ -306,23 +305,23 @@ public class Repository {
         Map<String, String> newTrackedFilesMap = stagingArea.get().commit();
         stagingArea.get().save();
         List<String> parents = new ArrayList<>();
-        parents.add(HEADCommit.get().getId());
+        parents.add(headCommit.get().getId());
         if (secondParent != null) {
             parents.add(secondParent);
         }
         Commit newCommit = new Commit(message, parents, newTrackedFilesMap);
         newCommit.save();
-        setBranchHeadCommit(currentBranch.get(), newCommit.getId());
+        setBranchHeadCommit(CURRENT_BRANCH.get(), newCommit.getId());
     }
 
     /** The remove command. */
     public void remove(String fileName) {
-       File file = getFileFromCWD(fileName);
-       if (stagingArea.get().remove(file)) {
-           stagingArea.get().save();
-       } else {
-           exit("No reason to remove the file.");
-       }
+        File file = getFileFromCWD(fileName);
+        if (stagingArea.get().remove(file)) {
+            stagingArea.get().save();
+        } else {
+            exit("No reason to remove the file.");
+        }
     }
 
     /** Creates a new branch with the given name. */
@@ -331,7 +330,7 @@ public class Repository {
         if (newBranchFile.exists()) {
             exit("A branch with that name already exists.");
         }
-        setBranchHeadCommit(newBranchFile, HEADCommit.get().getId());
+        setBranchHeadCommit(newBranchFile, headCommit.get().getId());
     }
 
     /** Deletes the branch with the given name. */
@@ -340,7 +339,7 @@ public class Repository {
         if (!branchFile.exists()) {
             exit("A branch with that name does not exist.");
         }
-        if (branchName.equals(currentBranch.get())) {
+        if (branchName.equals(CURRENT_BRANCH.get())) {
             exit("Cannot remove the current branch.");
         }
         rm(branchFile);
@@ -349,7 +348,7 @@ public class Repository {
     /** Checkout file from HEAD commit. */
     public void checkout(String fileName) {
         String filePath = getFileFromCWD(fileName).getPath();
-        if (!HEADCommit.get().restoreTracked(filePath)) {
+        if (!headCommit.get().restoreTracked(filePath)) {
             exit("File does not exist in that commit.");
         }
     }
@@ -369,7 +368,7 @@ public class Repository {
         if (!targetBranchFile.exists()) {
             exit("No such branch exists.");
         }
-        if (targetBranchName.equals(currentBranch.get())) {
+        if (targetBranchName.equals(CURRENT_BRANCH.get())) {
             exit("No need to checkout the current branch.");
         }
         Commit targetBranchCommit = getBranchHeadCommit(targetBranchName);
@@ -382,7 +381,7 @@ public class Repository {
     private void checkoutCommit(Commit targetCommit) {
         stagingArea.get().clear();
         stagingArea.get().save();
-        for (File file : currentFiles.get()) {
+        for (File file : CURRENT_FILES.get()) {
             rm(file);
         }
         targetCommit.restoreAllTracked();
@@ -391,7 +390,7 @@ public class Repository {
     /** Exit with message if target commit would overwrite the untracked files. */
     private void checkUntracked(Commit targetCommit) {
         Map<String, String> currentFilesMap = getCurrentFilesMap();
-        Map<String, String> trackedFilesMap = HEADCommit.get().getTracked();
+        Map<String, String> trackedFilesMap = headCommit.get().getTracked();
         Map<String, String> addedFilesMap = stagingArea.get().getAdded();
         Set<String> removedFilesPathSet = stagingArea.get().getRemoved();
 
@@ -442,12 +441,14 @@ public class Repository {
 
             for (File objectFile : objectDir.listFiles()) {
                 String objectFileName = objectFile.getName();
-                if (objectFileName.startsWith(objectFileNamePrefix) && isFileInstanceOf(objectFile, Commit.class)) {
-                    if (isFound) {
-                        exit("More than 1 commit has the same id prefix.");
+                if (objectFileName.startsWith(objectFileNamePrefix)) {
+                    if (isFileInstanceOf(objectFile, Commit.class)){
+                        if (isFound) {
+                            exit("More than 1 commit has the same id prefix.");
+                        }
+                        commitId = objectDirName + objectFileName;
+                        isFound = true;
                     }
-                    commitId = objectDirName + objectFileName;
-                    isFound = true;
                 }
             }
             if (!isFound) {
@@ -469,7 +470,7 @@ public class Repository {
         Commit targetCommit = Commit.fromFile(commitId);
         checkUntracked(targetCommit);
         checkoutCommit(targetCommit);
-        setBranchHeadCommit(currentBranch.get(), commitId);
+        setBranchHeadCommit(CURRENT_BRANCH.get(), commitId);
     }
 
     /** The find command. */
@@ -593,7 +594,7 @@ public class Repository {
         if (!targetBranchHeadFile.exists()) {
             exit("A branch with that name does not exist.");
         }
-        if (targetBranchName.equals(currentBranch.get())) {
+        if (targetBranchName.equals(CURRENT_BRANCH.get())) {
             exit("Cannot merge a branch with itself.");
         }
         if (!stagingArea.get().isClean()) {
@@ -604,13 +605,13 @@ public class Repository {
         checkUntracked(targetBranchHeadCommit);
 
         // 获得最近的公共父提交
-        Commit lcaCommit = getLatestCommonAncestorCommit(HEADCommit.get(), targetBranchHeadCommit);
+        Commit lcaCommit = getLatestCommonAncestorCommit(headCommit.get(), targetBranchHeadCommit);
         String lcaCommitId = lcaCommit.getId();
 
         if (lcaCommitId.equals(targetBranchHeadCommit.getId())) {
             exit("Given branch is an ancestor of the current branch.");
         }
-        if (lcaCommitId.equals(currentBranch.get())) {
+        if (lcaCommitId.equals(CURRENT_BRANCH.get())) {
             checkoutCommit(targetBranchHeadCommit);
             setCurrentBranch(targetBranchName);
             exit("Current branch fast-forwarded.");
@@ -618,8 +619,8 @@ public class Repository {
 
         boolean hasConflict = false;
 
-        Map<String, String> HEADCommitTrackedFilesMap = HEADCommit.get().getTracked();
-        Map<String, String> targetBranchHeadCommitTrackedFilesMap = targetBranchHeadCommit.getTracked();
+        Map<String, String> headCommitTrackedFilesMap = headCommit.get().getTracked();
+        Map<String, String> targetCommitFilesMap = targetBranchHeadCommit.getTracked();
         Map<String, String> lcaCommitTrackedFilesMap = lcaCommit.getTracked();
 
         // 遍历 lcaCommit 跟踪的文件
@@ -628,80 +629,80 @@ public class Repository {
             File file = new File(filePath);
             String blobId = entry.getValue();
 
-            String HEADCommitBlobId = HEADCommitTrackedFilesMap.get(filePath);
-            String targetBranchHeadCommitBlobId = targetBranchHeadCommitTrackedFilesMap.get(filePath);
+            String headCommitBlobId = headCommitTrackedFilesMap.get(filePath);
+            String targetCommitBlobId = targetCommitFilesMap.get(filePath);
 
-            if (targetBranchHeadCommitBlobId != null) { // 在目标分支上
-                if (!targetBranchHeadCommitBlobId.equals(blobId)) { // 在目标分支上修改
-                    if (HEADCommitBlobId != null) { //在当前分支上
-                        if (HEADCommitBlobId.equals(blobId)) { // 当前分支未修改
+            if (targetCommitBlobId != null) { // 在目标分支上
+                if (!targetCommitBlobId.equals(blobId)) { // 在目标分支上修改
+                    if (headCommitBlobId != null) { //在当前分支上
+                        if (headCommitBlobId.equals(blobId)) { // 当前分支未修改
                             // case 1
-                            Blob.fromFile(targetBranchHeadCommitBlobId).writeContentToSource();
+                            Blob.fromFile(targetCommitBlobId).writeContentToSource();
                             stagingArea.get().add(file);
                         } else { // 在当前分支修改
-                            if (!HEADCommitBlobId.equals(targetBranchHeadCommitBlobId)) { // modified in different ways
+                            if (!headCommitBlobId.equals(targetCommitBlobId)) { // modified in different ways
                                 // case 8
                                 hasConflict = true;
-                                String conflictContent = getConflictContent(HEADCommitBlobId, targetBranchHeadCommitBlobId);
-                                writeContents(file, conflictContent);
+                                String confCnt = getConflictContent(headCommitBlobId, targetCommitBlobId);
+                                writeContents(file, confCnt);
                                 stagingArea.get().add(file);
                             }  // modified in the same ways
                                // case 3
                         }
                     } else { // deleted in current branch
                         hasConflict = true;
-                        String conflictContent = getConflictContent(null, targetBranchHeadCommitBlobId);
-                        writeContents(file, conflictContent);
+                        String confCnt = getConflictContent(null, targetCommitBlobId);
+                        writeContents(file, confCnt);
                         stagingArea.get().add(file);
                     }
                 }  // else not modified in the target branch
                    // case 2, case 7
             } else { // deleted in the target branch
-                if (HEADCommitBlobId != null) { // exists in the current branch
-                    if (HEADCommitBlobId.equals(blobId)) { // not modified in the current branch
+                if (headCommitBlobId != null) { // exists in the current branch
+                    if (headCommitBlobId.equals(blobId)) { // not modified in the current branch
                         // case 6
                         stagingArea.get().remove(file);
                     } else { // modified in the current branch
                         // case 8
                         hasConflict = true;
-                        String conflictContent = getConflictContent(HEADCommitBlobId, null);
-                        writeContents(file, conflictContent);
+                        String confCnt = getConflictContent(headCommitBlobId, null);
+                        writeContents(file, confCnt);
                         stagingArea.get().add(file);
                     }
                 } // deleted in the current branch
                   // case 3
             }
 
-            HEADCommitTrackedFilesMap.remove(filePath);
-            targetBranchHeadCommitTrackedFilesMap.remove(filePath);
+            headCommitTrackedFilesMap.remove(filePath);
+            targetCommitFilesMap.remove(filePath);
         }
 
         // 遍历 target
-        for (Map.Entry<String, String> entry :targetBranchHeadCommitTrackedFilesMap.entrySet()) {
-            String targetBranchHeadCommitFilePath = entry.getKey();
-            File targetBranchHeadCommitFile = new File(targetBranchHeadCommitFilePath);
-            String targetBranchHeadCommitBlobId = entry.getValue();
+        for (Map.Entry<String, String> entry :targetCommitFilesMap.entrySet()) {
+            String filePath = entry.getKey();
+            File file = new File(filePath);
+            String targetCommitBlobId = entry.getValue();
 
-            String HEADCommitBlobId = HEADCommitTrackedFilesMap.get(targetBranchHeadCommitFilePath);
+            String headCommitBlobId = headCommitTrackedFilesMap.get(filePath);
 
-            if (HEADCommitBlobId != null) { // added in both branches
-                if (!HEADCommitBlobId.equals(targetBranchHeadCommitBlobId)) {
+            if (headCommitBlobId != null) { // added in both branches
+                if (!headCommitBlobId.equals(targetCommitBlobId)) {
                     // case 8
                     hasConflict = true;
-                    String conflictContent = getConflictContent(HEADCommitBlobId, targetBranchHeadCommitBlobId);
-                    writeContents(targetBranchHeadCommitFile, conflictContent);
-                    stagingArea.get().add(targetBranchHeadCommitFile);
+                    String confCnt = getConflictContent(headCommitBlobId, targetCommitBlobId);
+                    writeContents(file, confCnt);
+                    stagingArea.get().add(file);
                 } // modified in the same ways
                 // case 3
             } else { // only added in the target branch
                 // case 5
-                Blob.fromFile(targetBranchHeadCommitBlobId).writeContentToSource();
+                Blob.fromFile(targetCommitBlobId).writeContentToSource();
                 stagingArea.get().add(targetBranchHeadFile);
             }
         }
 
-        String newCommitMessage = "Merged" + " " + targetBranchName + " " + "into" + " " + currentBranch.get() + ".";
-        commit(newCommitMessage, targetBranchHeadCommit.getId());
+        String newMsg = "Merged " + targetBranchName + " into " + CURRENT_BRANCH.get() + ".";
+        commit(newMsg, targetBranchHeadCommit.getId());
 
         if (hasConflict) {
             message("Encountered a merge conflict.");
