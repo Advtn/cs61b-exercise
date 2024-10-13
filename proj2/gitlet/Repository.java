@@ -67,8 +67,8 @@ public class Repository {
     /** The staging area. */
     private final Lazy<StagingArea> stagingArea = lazy(() -> {
         StagingArea s = INDEX.exists()
-           ? StagingArea.fromFile()
-           : new StagingArea();
+            ? StagingArea.fromFile()
+            : new StagingArea();
         s.setTracked(headCommit.get().getTracked());
         return s;
     });
@@ -195,7 +195,6 @@ public class Repository {
     /** Print current status. */
     public void status() {
         StringBuilder statusBuilder = new StringBuilder();
-
         // Branches
         statusBuilder.append("=== Branches ===").append("\n");
         statusBuilder.append("*").append(CURRENT_BRANCH.get()).append("\n");
@@ -210,36 +209,32 @@ public class Repository {
         statusBuilder.append("\n");
 
         Map<String, String> addedFilesMap = stagingArea.get().getAdded();
-        Set<String> removedFilesMap = stagingArea.get().getRemoved();
+        Set<String> removedFilePathsSet = stagingArea.get().getRemoved();
 
         // Staged Files
         statusBuilder.append("=== Staged Files ===").append("\n");
         appendFileNamesInOrder(statusBuilder, addedFilesMap.keySet());
         statusBuilder.append("\n");
-
         // Removed Files
         statusBuilder.append("=== Removed Files ===").append("\n");
-        appendFileNamesInOrder(statusBuilder, removedFilesMap);
+        appendFileNamesInOrder(statusBuilder, removedFilePathsSet);
         statusBuilder.append("\n");
-
         // Modifications Not Staged For Commit
         statusBuilder.append("=== Modifications Not Staged For Commit ===").append("\n");
+
         List<String> modifiedNotStageFilePaths = new ArrayList<>();
         Set<String> deletedNotStageFilesPaths = new HashSet<>();
-
         Map<String, String> currentFilesMap = getCurrentFilesMap();
         Map<String, String> trackedFilesMap = headCommit.get().getTracked();
-
         trackedFilesMap.putAll(addedFilesMap);
-        for (String filePath : removedFilesMap) {
+
+        for (String filePath : removedFilePathsSet) {
             trackedFilesMap.remove(filePath);
         }
         for (Map.Entry<String, String> entry : trackedFilesMap.entrySet()) {
             String filePath = entry.getKey();
             String blobId = entry.getValue();
-
             String currentFileBlobId = currentFilesMap.get(filePath);
-
             if (currentFileBlobId != null) {
                 // Current file be tracked but content changed but not staged
                 if (!currentFileBlobId.equals(blobId)) {
@@ -253,9 +248,7 @@ public class Repository {
                 deletedNotStageFilesPaths.add(filePath);
             }
         }
-
         modifiedNotStageFilePaths.sort(String::compareTo);
-
         for (String filePath : modifiedNotStageFilePaths) {
             String fileName = Paths.get(filePath).getFileName().toString();
             statusBuilder.append(fileName);
@@ -267,12 +260,10 @@ public class Repository {
             statusBuilder.append("\n");
         }
         statusBuilder.append("\n");
-
         // Untracked Files
         statusBuilder.append("=== Untracked Files ===").append("\n");
         appendFileNamesInOrder(statusBuilder, currentFilesMap.keySet());
         statusBuilder.append("\n");
-
 
         System.out.print(statusBuilder);
     }
@@ -288,7 +279,7 @@ public class Repository {
         filePathList.sort(String::compareTo);
         for (String filePath : filePathList) {
             String fileName = Paths.get(filePath).getFileName().toString();
-            sb.append(fileName).append("\n").append("\n");
+            sb.append(fileName).append("\n");
         }
     }
 
@@ -442,7 +433,7 @@ public class Repository {
             for (File objectFile : objectDir.listFiles()) {
                 String objectFileName = objectFile.getName();
                 if (objectFileName.startsWith(objectFileNamePrefix)) {
-                    if (isFileInstanceOf(objectFile, Commit.class)){
+                    if (isFileInstanceOf(objectFile, Commit.class)) {
                         if (isFound) {
                             exit("More than 1 commit has the same id prefix.");
                         }
