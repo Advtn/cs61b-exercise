@@ -566,12 +566,12 @@ public class Repository {
         contentBuilder.append("<<<<<<< HEAD").append("\n");
         if (currentBlobId != null) {
             Blob currentBlob = Blob.fromFile(currentBlobId);
-            contentBuilder.append(currentBlob.getContentAsString());
+            contentBuilder.append(currentBlob.getContentAsString()).append("\n");
         }
         contentBuilder.append("=======").append("\n");
         if (targetBlobId != null) {
             Blob targetBlob = Blob.fromFile(targetBlobId);
-            contentBuilder.append(targetBlob.getContentAsString());
+            contentBuilder.append(targetBlob.getContentAsString()).append("\n");
         }
         contentBuilder.append(">>>>>>>");
         return contentBuilder.toString();
