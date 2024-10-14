@@ -531,7 +531,6 @@ public class Repository {
         while (true) {
             Commit nextCommit = queueToHoldCommits.poll();
             allCommitsQueue.add(nextCommit);
-//            cb.accept(nextCommit);
             checkedOrphanCommitIds.add(nextCommit.getId());
             List<String> parentCommitIds = nextCommit.getParents();
             if (parentCommitIds.isEmpty()) {
@@ -555,9 +554,8 @@ public class Repository {
                 if (checkedOrphanCommitIds.contains(objectId)) {
                     continue;
                 }
-                if (isFileInstanceOf(objectFile, Commit.class)){
+                if (isFileInstanceOf(objectFile, Commit.class)) {
                     allCommitsQueue.add(Commit.fromFile(objectId));
-//                    cb.accept(Commit.fromFile(objectId));
                 }
             }
         }
