@@ -56,6 +56,9 @@ public class Main {
                 Repository.checkWorkingDir();
                 validateNumArgs(args, 2);
                 String commitMessage = args[1];
+                if (commitMessage.isEmpty()) {
+                    exit("Found no commit with that message.");
+                }
                 Repository.find(commitMessage);
             }
             case "status" -> {

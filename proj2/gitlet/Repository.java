@@ -223,7 +223,7 @@ public class Repository {
         statusBuilder.append("=== Modifications Not Staged For Commit ===").append("\n");
 
         List<String> modifiedNotStageFilePaths = new ArrayList<>();
-        Set<String> deletedNotStageFilesPaths = new HashSet<>();
+        Set<String> deletedNotStageFilePaths = new HashSet<>();
         Map<String, String> currentFilesMap = getCurrentFilesMap();
         Map<String, String> trackedFilesMap = headCommit.get().getTracked();
         trackedFilesMap.putAll(addedFilesMap);
@@ -245,14 +245,14 @@ public class Repository {
             } else {
                 // Current file does not be tracked
                 modifiedNotStageFilePaths.add(filePath);
-                deletedNotStageFilesPaths.add(filePath);
+                deletedNotStageFilePaths.add(filePath);
             }
         }
         modifiedNotStageFilePaths.sort(String::compareTo);
         for (String filePath : modifiedNotStageFilePaths) {
             String fileName = Paths.get(filePath).getFileName().toString();
             statusBuilder.append(fileName);
-            if (deletedNotStageFilesPaths.contains(filePath)) {
+            if (deletedNotStageFilePaths.contains(filePath)) {
                 statusBuilder.append(" ").append("(deleted)");
             } else {
                 statusBuilder.append(" ").append("(modified)");
@@ -631,7 +631,8 @@ public class Repository {
                             Blob.fromFile(targetCommitBlobId).writeContentToSource();
                             stagingArea.get().add(file);
                         } else { // 在当前分支修改
-                            if (!headCommitBlobId.equals(targetCommitBlobId)) { // modified in different ways
+                            if (!headCommitBlobId.equals(targetCommitBlobId)) {
+                                // modified in different ways
                                 // case 8
                                 hasConflict = true;
                                 String confCnt = getConflictContent(headCommitBlobId, targetCommitBlobId);
@@ -688,7 +689,7 @@ public class Repository {
             } else { // only added in the target branch
                 // case 5
                 Blob.fromFile(targetCommitBlobId).writeContentToSource();
-                stagingArea.get().add(targetBranchHeadFile);
+                stagingArea.get().add(file);
             }
         }
 
