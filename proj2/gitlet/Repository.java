@@ -485,11 +485,15 @@ public class Repository {
         System.out.print(logBuilder);
     }
 
+    /** Get priority queue with comparator by date. */
+    private static PriorityQueue<Commit> getPriorityQueue() {
+        Comparator<Commit> commitComparator = Comparator.comparing(Commit::getDate).reversed();
+        return new PriorityQueue<>(commitComparator);
+    }
+
     /** Iterate all commits in the order of created date */
     private static void forEachCommitInOrder(Consumer<Commit> cb) {
-        // Sort commits by date, with the latest at the front
-        Comparator<Commit> commitComparator = Comparator.comparing(Commit::getDate).reversed();
-        Queue<Commit> commitsPriorityQueue = new PriorityQueue<>(commitComparator);
+        Queue<Commit> commitsPriorityQueue = getPriorityQueue();
         forEachCommit(cb, commitsPriorityQueue);
     }
 
@@ -503,6 +507,9 @@ public class Repository {
     @SuppressWarnings("ConstantConditions")
     private static void forEachCommit(Consumer<Commit> cb, Queue<Commit> queueToHoldCommits) {
         Set<String> checkedCommitIds = new HashSet<>();
+        Set<String> checkedOrphanCommitIds = new HashSet<>();
+
+        Queue<Commit> allCommitsQueue = getPriorityQueue();
 
         File[] branchHeadFiles = BRANCH_HEADS_DIR.listFiles();
         Arrays.sort(branchHeadFiles, Comparator.comparing(File::getName));
@@ -523,7 +530,9 @@ public class Repository {
         //处理所有的 parent commit
         while (true) {
             Commit nextCommit = queueToHoldCommits.poll();
-            cb.accept(nextCommit);
+            allCommitsQueue.add(nextCommit);
+//            cb.accept(nextCommit);
+            checkedOrphanCommitIds.add(nextCommit.getId());
             List<String> parentCommitIds = nextCommit.getParents();
             if (parentCommitIds.isEmpty()) {
                 break;
@@ -536,6 +545,26 @@ public class Repository {
                 Commit parentCommit = Commit.fromFile(parentCommitId);
                 queueToHoldCommits.add(parentCommit);
             }
+        }
+
+        // 处理孤立commit
+        File[] objects = OBJECTS_DIR.listFiles();
+        for (File objectDir : objects) {
+            for (File objectFile : objectDir.listFiles()) {
+                String objectId = objectDir.getName() + objectFile.getName();
+                if (checkedOrphanCommitIds.contains(objectId)) {
+                    continue;
+                }
+                if (isFileInstanceOf(objectFile, Commit.class)){
+                    allCommitsQueue.add(Commit.fromFile(objectId));
+//                    cb.accept(Commit.fromFile(objectId));
+                }
+            }
+        }
+
+        while (!allCommitsQueue.isEmpty()) {
+            Commit commit = allCommitsQueue.poll();
+            cb.accept(commit);
         }
     }
 
