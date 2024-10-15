@@ -695,7 +695,7 @@ public class Repository {
                             Blob.fromFile(targetCmtBId).writeContentToSource();
                             stagingArea.get().add(file);
                         } else { // 在当前分支修改
-                            if (!headCmtBId.equals(targetCmtBId)) {// modified in different ways
+                            if (!headCmtBId.equals(targetCmtBId)) { // modified in different ways
                                 hasConflict = true;
                                 writeAndStage(headCmtBId, targetCmtBId, file);
                             }  // modified in the same ways
