@@ -646,10 +646,13 @@ public class Repository {
         Commit lcaCommit = getLatestCommonAncestorCommit(headCommit.get(), targetBranchHeadCommit);
         String lcaCommitId = lcaCommit.getId();
 
+        //test
+        System.out.println(lcaCommitId);
+
         if (lcaCommitId.equals(targetBranchHeadCommit.getId())) {
             exit("Given branch is an ancestor of the current branch.");
         }
-        if (lcaCommitId.equals(CURRENT_BRANCH.get())) {
+        if (lcaCommitId.equals(headCommit.get().getId())) {
             checkoutCommit(targetBranchHeadCommit);
             setCurrentBranch(targetBranchName);
             exit("Current branch fast-forwarded.");
