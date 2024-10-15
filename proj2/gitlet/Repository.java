@@ -595,15 +595,15 @@ public class Repository {
     /** Merge the conflicted blob content and return a new String.*/
     private static String getConflictContent(String currentBlobId, String targetBlobId) {
         StringBuilder contentBuilder = new StringBuilder();
-        contentBuilder.append("<<<<<<< HEAD").append("\n");
+        contentBuilder.append("<<<<<<< HEAD").append(System.lineSeparator());
         if (currentBlobId != null) {
             Blob currentBlob = Blob.fromFile(currentBlobId);
-            contentBuilder.append(currentBlob.getContentAsString()).append("\n");
+            contentBuilder.append(currentBlob.getContentAsString()).append(System.lineSeparator());
         }
-        contentBuilder.append("=======").append("\n");
+        contentBuilder.append("=======").append(System.lineSeparator());
         if (targetBlobId != null) {
             Blob targetBlob = Blob.fromFile(targetBlobId);
-            contentBuilder.append(targetBlob.getContentAsString()).append("\n");
+            contentBuilder.append(targetBlob.getContentAsString()).append(System.lineSeparator());
         }
         contentBuilder.append(">>>>>>>");
         return contentBuilder.toString();
