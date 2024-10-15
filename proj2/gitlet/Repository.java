@@ -132,11 +132,16 @@ public class Repository {
         return join(BRANCH_HEADS_DIR, branchName);
     }
 
-    /** Get commit that branch pointed. */
+    /** Get commit by branch name. */
     private static Commit getBranchHeadCommit(String branchName) {
         File branchFile = getBranchHeadFile(branchName);
-        String branchCommitId = readContentsAsString(branchFile);
-        return Commit.fromFile(branchCommitId);
+        return getBranchHeadCommit(branchFile);
+    }
+
+    /** Get commit by branch file. */
+    private static Commit getBranchHeadCommit(File branchHeadFile) {
+        String headCommitId = readContentsAsString(branchHeadFile);
+        return Commit.fromFile(headCommitId);
     }
 
     /** Creates initial commit. */
@@ -362,7 +367,7 @@ public class Repository {
         if (targetBranchName.equals(CURRENT_BRANCH.get())) {
             exit("No need to checkout the current branch.");
         }
-        Commit targetBranchCommit = getBranchHeadCommit(targetBranchName);
+        Commit targetBranchCommit = getBranchHeadCommit(targetBranchFile);
         checkUntracked(targetBranchCommit);
         checkoutCommit(targetBranchCommit);
         setCurrentBranch(targetBranchName);
@@ -619,7 +624,7 @@ public class Repository {
             exit("You have uncommitted changes.");
         }
         // 获得目标分支头提交
-        Commit targetBranchHeadCommit = getBranchHeadCommit(targetBranchName);
+        Commit targetBranchHeadCommit = getBranchHeadCommit(targetBranchHeadFile);
         checkUntracked(targetBranchHeadCommit);
 
         // 获得最近的公共父提交
@@ -637,8 +642,11 @@ public class Repository {
 
         boolean hasConflict = false;
 
-        Map<String, String> headCommitTrackedFilesMap = headCommit.get().getTracked();
-        Map<String, String> targetCommitFilesMap = targetBranchHeadCommit.getTracked();
+        // bug在这里！
+        // 我使用了Map<String, String> headCommitTrackedFilesMap = headCommit.get().getTracked();
+        // 这不会创建副本，而是直接操控 headCommit !
+        Map<String, String> headCommitTrackedFilesMap = new HashMap<>(headCommit.get().getTracked());
+        Map<String, String> targetCommitTrackedFilesMap = targetBranchHeadCommit.getTracked();
         Map<String, String> lcaCommitTrackedFilesMap = lcaCommit.getTracked();
 
         // 遍历 lcaCommit 跟踪的文件
@@ -648,7 +656,7 @@ public class Repository {
             String blobId = entry.getValue();
 
             String headCommitBlobId = headCommitTrackedFilesMap.get(filePath);
-            String targetCommitBlobId = targetCommitFilesMap.get(filePath);
+            String targetCommitBlobId = targetCommitTrackedFilesMap.get(filePath);
 
             if (targetCommitBlobId != null) { // 在目标分支上
                 if (!targetCommitBlobId.equals(blobId)) { // 在目标分支上修改
@@ -693,11 +701,11 @@ public class Repository {
             }
 
             headCommitTrackedFilesMap.remove(filePath);
-            targetCommitFilesMap.remove(filePath);
+            targetCommitTrackedFilesMap.remove(filePath);
         }
 
         // 遍历 target
-        for (Map.Entry<String, String> entry :targetCommitFilesMap.entrySet()) {
+        for (Map.Entry<String, String> entry :targetCommitTrackedFilesMap.entrySet()) {
             String filePath = entry.getKey();
             File file = new File(filePath);
             String targetCommitBlobId = entry.getValue();
