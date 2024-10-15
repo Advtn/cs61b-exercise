@@ -646,9 +646,6 @@ public class Repository {
         Commit lcaCommit = getLatestCommonAncestorCommit(headCommit.get(), targetBranchHeadCommit);
         String lcaCommitId = lcaCommit.getId();
 
-        //test
-        System.out.println(lcaCommitId);
-
         if (lcaCommitId.equals(targetBranchHeadCommit.getId())) {
             exit("Given branch is an ancestor of the current branch.");
         }
