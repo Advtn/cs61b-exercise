@@ -571,25 +571,41 @@ public class Repository {
         }
     }
 
+    /** Get Bread First Path . */
+    @SuppressWarnings("ConstantConditions")
+    private static List<String> getBreadFirstPath(Commit commit) {
+        Queue<Commit> commitQueue = new ArrayDeque<>();
+        List<String> commitsInOrder = new ArrayList<>();
+        Set<String> checkedCommits = new HashSet<>();
+        commitQueue.add(commit);
+
+        while (!commitQueue.isEmpty()) {
+            Commit latestCommit = commitQueue.poll();
+            String latestCommitId = latestCommit.getId();
+            if (checkedCommits.contains(latestCommitId)) {
+                continue;
+            }
+            for (String commitId : latestCommit.getParents()) {
+                commitQueue.add(Commit.fromFile(commitId));
+            }
+            commitsInOrder.add(latestCommitId);
+            checkedCommits.add(latestCommitId);
+        }
+        return commitsInOrder;
+    }
+
     /** Get the latest common ancestor commit of the two commits. */
     @SuppressWarnings("ConstantConditions")
     private static Commit getLatestCommonAncestorCommit(Commit commitA, Commit commitB) {
-        Comparator<Commit> commitComparator = Comparator.comparing(Commit::getDate).reversed();
-        Queue<Commit> commitQueue = new PriorityQueue<>(commitComparator);
-        commitQueue.add(commitA);
-        commitQueue.add(commitB);
-        Set<String> checkedCommitIds = new HashSet<>();
-        while (true) {
-            Commit latestCommit = commitQueue.poll();
-            List<String> parentCommitIds = latestCommit.getParents();
-            String firstParentCommitId = parentCommitIds.get(0);
-            Commit firstParentCommit = Commit.fromFile(firstParentCommitId);
-            if (checkedCommitIds.contains(firstParentCommitId)) {
-                return firstParentCommit;
+        List<String> commitsA = getBreadFirstPath(commitA);
+        List<String> commitsB = getBreadFirstPath(commitB);
+
+        for (String commitId : commitsA) {
+            if (commitsB.contains(commitId)) {
+                return Commit.fromFile(commitId);
             }
-            commitQueue.add(firstParentCommit);
-            checkedCommitIds.add(firstParentCommitId);
         }
+        return null;
     }
 
     /** Merge the conflicted blob content and return a new String.*/
