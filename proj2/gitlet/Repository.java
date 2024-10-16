@@ -622,7 +622,7 @@ public class Repository {
             Blob targetBlob = Blob.fromFile(targetBlobId);
             contentBuilder.append(targetBlob.getContentAsString()).append("\n");
         }
-        contentBuilder.append(">>>>>>>").append("\n");
+        contentBuilder.append(">>>>>>>");
         return contentBuilder.toString();
     }
 
