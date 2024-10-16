@@ -615,12 +615,22 @@ public class Repository {
         contentBuilder.append("<<<<<<< HEAD").append("\n");
         if (currentBlobId != null) {
             Blob currentBlob = Blob.fromFile(currentBlobId);
-            contentBuilder.append(currentBlob.getContentAsString());
+            String content = currentBlob.getContentAsString();
+            if (content.charAt(content.length() - 1) == '\n') {
+                contentBuilder.append(content);
+            } else {
+                contentBuilder.append(content).append("\n");
+            }
         }
         contentBuilder.append("=======").append("\n");
         if (targetBlobId != null) {
             Blob targetBlob = Blob.fromFile(targetBlobId);
-            contentBuilder.append(targetBlob.getContentAsString());
+            String content = targetBlob.getContentAsString();
+            if (content.charAt(content.length() - 1) == '\n') {
+                contentBuilder.append(content);
+            } else {
+                contentBuilder.append(content).append("\n");
+            }
         }
         contentBuilder.append(">>>>>>>");
         return contentBuilder.toString();
