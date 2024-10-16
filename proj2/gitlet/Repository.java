@@ -622,7 +622,7 @@ public class Repository {
             Blob targetBlob = Blob.fromFile(targetBlobId);
             contentBuilder.append(targetBlob.getContentAsString()).append(System.lineSeparator());
         }
-        contentBuilder.append(">>>>>>>").append(System.lineSeparator());
+        contentBuilder.append(">>>>>>>");
         return contentBuilder.toString();
     }
 
@@ -658,8 +658,9 @@ public class Repository {
     }
 
     /** Write conflict content to file and stage it. */
-    private void writeAndStage(String headCmtBId, String targetCmtBId, File file) {
+    private void writeAndStage(String headCmtBId, String targetCmtBId, File file, String bName) {
         String confCnt = getConflictContent(headCmtBId, targetCmtBId);
+        confCnt += " " + bName + System.lineSeparator();
         writeContents(file, confCnt);
         stagingArea.get().add(file);
     }
@@ -698,12 +699,12 @@ public class Repository {
                         } else { // 在当前分支修改
                             if (!headCmtBId.equals(targetCmtBId)) { // modified in different ways
                                 hasConflict = true;
-                                writeAndStage(headCmtBId, targetCmtBId, file);
+                                writeAndStage(headCmtBId, targetCmtBId, file, targetBranchName);
                             }  // modified in the same ways
                         }
                     } else { // deleted in current branch
                         hasConflict = true;
-                        writeAndStage(null, targetCmtBId, file);
+                        writeAndStage(null, targetCmtBId, file, targetBranchName);
                     }
                 }  // else not modified in the target branch
             } else { // deleted in the target branch
@@ -712,7 +713,7 @@ public class Repository {
                         stagingArea.get().remove(file);
                     } else { // modified in the current branch
                         hasConflict = true;
-                        writeAndStage(headCmtBId, null, file);
+                        writeAndStage(headCmtBId, null, file, targetBranchName);
                     }
                 } // deleted in the current branch
             }
@@ -730,7 +731,7 @@ public class Repository {
             if (headCmtBId != null) { // added in both branches
                 if (!headCmtBId.equals(targetCmtBId)) {
                     hasConflict = true;
-                    writeAndStage(headCmtBId, targetCmtBId, file);
+                    writeAndStage(headCmtBId, targetCmtBId, file, targetBranchName);
                 } // modified in the same ways
             } else { // only added in the target branch
                 Blob.fromFile(targetCmtBId).writeContentToSource();
