@@ -408,13 +408,14 @@ public class Repository {
         }
 
         Map<String, String> targetCommitTrackedFilesMap = targetCommit.getTracked();
+        String mg = "There is an untracked file in the way; delete it, or add and commit it first.";
 
         // 检查未跟踪文件是否改变，如果改变则打印消息并退出程序
         for (String filePath : untrackedFilePaths) {
             String blobId = currentFilesMap.get(filePath);
             String targetBlobId = targetCommitTrackedFilesMap.get(filePath);
             if (!blobId.equals(targetBlobId)) {
-                exit("There is an untracked file in the way; delete it, or add and commit it first.");
+                exit(mg);
             }
         }
     }

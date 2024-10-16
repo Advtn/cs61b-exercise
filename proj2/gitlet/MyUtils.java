@@ -1,10 +1,7 @@
 package gitlet;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.function.Supplier;
 
 import static gitlet.Utils.*;
@@ -94,7 +91,7 @@ public class MyUtils {
     public static boolean isFileInstanceOf(File file, Class<?> c) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             return c.isInstance(in.readObject());
-        } catch (Exception ignored) {
+        } catch (IOException | ClassNotFoundException e) {
             return false;
         }
     }
