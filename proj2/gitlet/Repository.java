@@ -613,16 +613,14 @@ public class Repository {
     private static String getConflictContent(String currentBlobId, String targetBlobId) {
         StringBuilder contentBuilder = new StringBuilder();
         contentBuilder.append("<<<<<<< HEAD").append("\n");
-        if (currentBlobId != null) {
-            Blob currentBlob = Blob.fromFile(currentBlobId);
-            String content = currentBlob.getContentAsString();
-            if (content.charAt(content.length() - 1) == '\n') {
-                contentBuilder.append(content);
-            } else {
-                contentBuilder.append(content).append("\n");
-            }
-        }
+        getContent(currentBlobId, contentBuilder);
         contentBuilder.append("=======").append("\n");
+        getContent(targetBlobId, contentBuilder);
+        contentBuilder.append(">>>>>>>").append("\n");
+        return contentBuilder.toString();
+    }
+
+    private static void getContent(String targetBlobId, StringBuilder contentBuilder) {
         if (targetBlobId != null) {
             Blob targetBlob = Blob.fromFile(targetBlobId);
             String content = targetBlob.getContentAsString();
@@ -632,8 +630,6 @@ public class Repository {
                 contentBuilder.append(content).append("\n");
             }
         }
-        contentBuilder.append(">>>>>>>");
-        return contentBuilder.toString();
     }
 
     /** check if exit. */
